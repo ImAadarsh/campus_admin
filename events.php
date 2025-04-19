@@ -1,0 +1,154 @@
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+session_start();
+
+// Check if user is not logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+// Include database connection
+$conn = require_once 'config/config.php';
+
+// Get user type and name from session
+$userType = $_SESSION['user_type'];
+$userName = $_SESSION['user_name'];
+$userId = $_SESSION['user_id'];
+
+
+// Fetch events
+$sql = "SELECT * FROM events ORDER BY date_time DESC";
+$result = mysqli_query($conn, $sql);
+
+if (!$result) {
+    die("Query failed: " . mysqli_error($conn));
+}
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Events | Campus Coach</title>
+    <?php include 'includes/head.php'; ?>
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        .event-image {
+            max-width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <?php include 'includes/sidenav.php'; ?>
+        <?php include 'includes/topbar.php'; ?>
+
+        <div class="page-content">
+            <div class="page-container">
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="page-title-box d-flex align-items-center justify-content-between">
+                            <h4 class="mb-0">Events</h4>
+                            <a href="event_add.php" class="btn btn-primary">Add New Event</a>
+                        </div>
+                    </div>
+                </div>
+
+                <?php if (isset($_SESSION['success'])) : ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <?php 
+                        echo $_SESSION['success'];
+                        unset($_SESSION['success']);
+                        ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (isset($_SESSION['error'])) : ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <?php 
+                        echo $_SESSION['error'];
+                        unset($_SESSION['error']);
+                        ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <table id="events-table" class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Name</th>
+                                            <th>Location</th>
+                                            <th>Date & Time</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php while ($row = mysqli_fetch_assoc($result)) : ?>
+                                            <tr>
+                                                <td>
+                                                    <img src="<?php echo $uri . htmlspecialchars($row['image']); ?>" 
+                                                         alt="Event Image" 
+                                                         class="event-image">
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['name']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['location']); ?></td>
+                                                <td><?php echo date('M d, Y H:i', strtotime($row['date_time'])); ?></td>
+                                                <td>
+                                                    <a href="event_view.php?id=<?php echo $row['id']; ?>" 
+                                                       class="btn btn-sm btn-info">View</a>
+                                                    <a href="event_edit.php?id=<?php echo $row['id']; ?>" 
+                                                       class="btn btn-sm btn-primary">Edit</a>
+                                                    <button onclick="deleteEvent(<?php echo $row['id']; ?>)" 
+                                                            class="btn btn-sm btn-danger">Delete</button>
+                                                </td>
+                                            </tr>
+                                        <?php endwhile; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php include 'includes/footer.php'; ?>
+        </div>
+    </div>
+
+    <?php include 'includes/theme_settings.php'; ?>
+
+    <!-- Vendor js -->
+    <script src="assets/js/vendor.min.js"></script>
+    <!-- App js -->
+    <script src="assets/js/app.js"></script>
+    <!-- DataTables js -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#events-table').DataTable({
+                "order": [[3, "desc"]]
+            });
+        });
+
+        function deleteEvent(id) {
+            if (confirm('Are you sure you want to delete this event?')) {
+                window.location.href = 'event_delete.php?id=' + id;
+            }
+        }
+    </script>
+</body>
+</html> 
