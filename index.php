@@ -79,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="card overflow-hidden text-center h-100 p-xxl-4 p-3 mb-0">
                     <a href="index.php" class="auth-brand mb-3">
                    
-                            <span class="logo-lg"><span class="logo-text">Campus Coach</span></span>
+                            <span ><img width="350px" src="logo.svg" alt="Campus Coach Logo" class="logo-img"></span>
                          
                    
                     </a>

@@ -5,13 +5,13 @@
                     <!-- Brand Logo -->
                     <a href="dashboard.php" class="logo">
                         <span class="logo-light">
-                            <span class="logo-lg"><span class="logo-text">Campus Coach</span></span>
-                            <span class="logo-sm"><span class="logo-text-sm">CC</span></span>
+                            <span class="logo-lg"><img style="min-height: 55px !important;" src="logo.svg" alt="Campus Coach Logo" ></span>
+                            <span class="logo-sm"><img style="min-height: 40px !important;" src="logo.png" alt="Campus Coach Logo" class="logo-img"></span>
                         </span>
 
                         <span class="logo-dark">
-                            <span class="logo-lg"><span class="logo-text">Campus Coach</span></span>
-                            <span class="logo-sm"><span class="logo-text-sm">CC</span></span>
+                            <span class="logo-lg"><img style="min-height: 55px !important;" src="logo.svg" alt="Campus Coach Logo" ></span>
+                            <span class="logo-sm"><img style="min-height: 40px !important;" src="logo.png" alt="Campus Coach Logo" class="logo-img"></span>
                         </span>
                     </a>
 </a>
