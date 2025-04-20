@@ -150,7 +150,13 @@ $stats_sql = "SELECT
     COALESCE(SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END), 0) as pending_amount,
     COALESCE(SUM(CASE WHEN status = 'refunded' THEN amount ELSE 0 END), 0) as refunded_amount,
     COALESCE(AVG(CASE WHEN status = 'completed' THEN amount ELSE NULL END), 0) as avg_transaction
-    FROM payments p $where_clause";
+    FROM payments p 
+    LEFT JOIN bookings b ON p.booking_id = b.id 
+    LEFT JOIN users u ON b.user_id = u.id 
+    LEFT JOIN time_slots ts ON b.time_slot_id = ts.id 
+    LEFT JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id 
+    LEFT JOIN trainers t ON ta.trainer_id = t.id 
+    $where_clause";
 
 $stats_result = mysqli_query($conn, $stats_sql);
 
