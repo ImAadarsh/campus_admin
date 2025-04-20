@@ -3,7 +3,7 @@
     <meta content="Endeavour Digital" name="author" />
 
     <!-- App favicon -->
-    <link rel="shortcut icon" href="assets/images/favicon.ico">
+    <link rel="shortcut icon" href="logo.png">
 
     <!-- Theme Config Js -->
     <script src="assets/js/config.js"></script>
