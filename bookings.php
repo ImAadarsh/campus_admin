@@ -247,7 +247,7 @@ $payment_statuses = ['pending', 'completed', 'failed', 'refunded'];
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">Trainer</label>
-                                            <select class="form-select" name="trainer">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="trainer">
                                                 <option value="">All Trainers</option>
                                                 <?php while($trainer = mysqli_fetch_assoc($trainers)): ?>
                                                     <option value="<?php echo $trainer['id']; ?>" 
@@ -262,7 +262,7 @@ $payment_statuses = ['pending', 'completed', 'failed', 'refunded'];
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">User</label>
-                                            <select class="form-select" name="user">
+                                            <select  data-choices data-choices-sorting-false class="form-select" name="user">
                                                 <option value="">All Users</option>
                                                 <?php while($user = mysqli_fetch_assoc($users)): ?>
                                                     <option value="<?php echo $user['id']; ?>" 
@@ -277,7 +277,7 @@ $payment_statuses = ['pending', 'completed', 'failed', 'refunded'];
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">Booking Status</label>
-                                            <select class="form-select" name="status">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="status">
                                                 <option value="">All Statuses</option>
                                                 <?php foreach($booking_statuses as $status): ?>
                                                     <option value="<?php echo $status; ?>" 
@@ -306,7 +306,7 @@ $payment_statuses = ['pending', 'completed', 'failed', 'refunded'];
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">Payment Status</label>
-                                            <select class="form-select" name="payment_status">
+                                            <select  data-choices data-choices-sorting-false class="form-select" name="payment_status">
                                                 <option value="">All Statuses</option>
                                                 <?php foreach($payment_statuses as $status): ?>
                                                     <option value="<?php echo $status; ?>" 

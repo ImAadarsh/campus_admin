@@ -244,7 +244,7 @@ function getInitials($firstName, $lastName) {
                     </div>
                                     <div class="col-md-2">
                                         <div class="form-group">
-                                            <select class="form-select" name="grade">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="grade">
                                                 <option value="">All Grades</option>
                                                 <?php while($grade_row = mysqli_fetch_assoc($grades)): ?>
                                                     <option value="<?php echo $grade_row['grade']; ?>" <?php echo $filters['grade'] == $grade_row['grade'] ? 'selected' : ''; ?>>
@@ -256,7 +256,7 @@ function getInitials($firstName, $lastName) {
                         </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <select class="form-select" name="city">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="city">
                                                 <option value="">All Cities</option>
                                                 <?php while($city_row = mysqli_fetch_assoc($cities)): ?>
                                                     <option value="<?php echo $city_row['city']; ?>" <?php echo $filters['city'] == $city_row['city'] ? 'selected' : ''; ?>>
@@ -268,7 +268,7 @@ function getInitials($firstName, $lastName) {
                                         </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <select class="form-select" name="school">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="school">
                                                 <option value="">All Schools</option>
                                                 <?php while($school_row = mysqli_fetch_assoc($schools)): ?>
                                                     <option value="<?php echo $school_row['school']; ?>" <?php echo $filters['school'] == $school_row['school'] ? 'selected' : ''; ?>>

@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                     <div class="mb-3">
                                         <label for="category_id" class="form-label">Category</label>
-                                        <select class="form-control" id="category_id" name="category_id" required>
+                                        <select data-choices data-choices-sorting-false class="form-control" id="category_id" name="category_id" required>
                                             <option value="">Select Category</option>
                                             <?php while ($category = mysqli_fetch_assoc($categories)) : ?>
                                                 <option value="<?php echo $category['id']; ?>">

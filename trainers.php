@@ -217,7 +217,7 @@ $specializations = mysqli_query($conn, $sql_specializations);
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">Designation</label>
-                                            <select class="form-select" name="designation">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="designation">
                                                 <option value="">All Designations</option>
                                                 <?php while($designation = mysqli_fetch_assoc($designations)): ?>
                                                     <option value="<?php echo $designation['designation']; ?>" 
@@ -232,7 +232,7 @@ $specializations = mysqli_query($conn, $sql_specializations);
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">Specialization</label>
-                                            <select class="form-select" name="specialization">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="specialization">
                                                 <option value="">All Specializations</option>
                                                 <?php while($specialization = mysqli_fetch_assoc($specializations)): ?>
                                                     <option value="<?php echo $specialization['specialization']; ?>" 

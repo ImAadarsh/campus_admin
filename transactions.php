@@ -337,7 +337,7 @@ if (!$stats_result) {
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">Status</label>
-                                            <select class="form-select" name="status">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="status">
                                                 <option value="">All Statuses</option>
                                                 <?php foreach($payment_statuses as $status): ?>
                                                     <option value="<?php echo $status; ?>" 
@@ -352,7 +352,7 @@ if (!$stats_result) {
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">Payment Method</label>
-                                            <select class="form-select" name="payment_method">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="payment_method">
                                                 <option value="">All Methods</option>
                                                 <?php foreach($payment_methods as $method): ?>
                                                     <option value="<?php echo $method; ?>" 
@@ -393,7 +393,7 @@ if (!$stats_result) {
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">User</label>
-                                            <select class="form-select" name="user">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="user">
                                                 <option value="">All Users</option>
                                                 <?php while($user = mysqli_fetch_assoc($users)): ?>
                                                     <option value="<?php echo $user['id']; ?>" 
@@ -408,7 +408,7 @@ if (!$stats_result) {
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label class="form-label">Trainer</label>
-                                            <select class="form-select" name="trainer">
+                                            <select data-choices data-choices-sorting-false class="form-select" name="trainer">
                                                 <option value="">All Trainers</option>
                                                 <?php while($trainer = mysqli_fetch_assoc($trainers)): ?>
                                                     <option value="<?php echo $trainer['id']; ?>" 

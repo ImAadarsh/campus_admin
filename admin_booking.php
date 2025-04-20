@@ -161,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="user_id" class="form-label">Select User</label>
-                                                <select class="form-select" id="user_id" name="user_id" required>
+                                                <select data-choices data-choices-sorting-false class="form-select" id="user_id" name="user_id" required>
                                                     <option value="">Choose a user...</option>
                                                     <?php while ($user = mysqli_fetch_assoc($users_result)) : ?>
                                                         <option value="<?php echo $user['id']; ?>">
@@ -174,7 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="trainer_id" class="form-label">Select Trainer</label>
-                                                <select class="form-select" id="trainer_id" name="trainer_id" required>
+                                                <select data-choices data-choices-sorting-false class="form-select" id="trainer_id" name="trainer_id" required>
                                                     <option value="">Choose a trainer...</option>
                                                     <?php while ($trainer = mysqli_fetch_assoc($trainers_result)) : ?>
                                                         <option value="<?php echo $trainer['id']; ?>">

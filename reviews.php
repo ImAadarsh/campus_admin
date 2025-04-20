@@ -140,7 +140,7 @@ if (!$result) {
                                         <div class="row">
                                             <div class="col-md-3 col-sm-6 mb-2">
                                                 <label class="form-label">Filter by Rating</label>
-                                                <select id="rating-filter" class="form-select">
+                                                <select data-choices data-choices-sorting-false id="rating-filter" class="form-select">
                                                     <option value="">All Ratings</option>
                                                     <option value="5">5 Stars</option>
                                                     <option value="4">4 Stars</option>
@@ -151,7 +151,7 @@ if (!$result) {
                                             </div>
                                             <div class="col-md-3 col-sm-6 mb-2">
                                                 <label class="form-label">Filter by Status</label>
-                                                <select id="status-filter" class="form-select">
+                                                <select data-choices data-choices-sorting-false id="status-filter" class="form-select">
                                                     <option value="">All Statuses</option>
                                                     <option value="completed">Completed</option>
                                                     <option value="cancelled">Cancelled</option>

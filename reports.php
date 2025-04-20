@@ -238,7 +238,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                         <form method="GET" class="row g-3 align-items-center">
                             <div class="col-md-2">
                                 <label class="form-label">Report Type</label>
-                                <select class="form-select" name="report_type">
+                                <select data-choices data-choices-sorting-false class="form-select" name="report_type">
                                     <option value="all" <?php echo $filters['report_type'] == 'all' ? 'selected' : ''; ?>>All Reports</option>
                                     <option value="bookings" <?php echo $filters['report_type'] == 'bookings' ? 'selected' : ''; ?>>Bookings</option>
                                     <option value="payments" <?php echo $filters['report_type'] == 'payments' ? 'selected' : ''; ?>>Payments</option>
@@ -248,7 +248,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
 
                             <div class="col-md-2">
                                 <label class="form-label">Trainer</label>
-                                <select class="form-select" name="trainer_id">
+                                <select data-choices data-choices-sorting-false class="form-select" name="trainer_id">
                                     <option value="">All Trainers</option>
                                     <?php foreach ($trainers as $trainer): ?>
                                         <option value="<?php echo $trainer['id']; ?>" <?php echo $filters['trainer_id'] == $trainer['id'] ? 'selected' : ''; ?>>
@@ -260,7 +260,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
 
                             <div class="col-md-2">
                                 <label class="form-label">User</label>
-                                <select class="form-select" name="user_id"  data-choices data-choices-sorting-false>
+                                <select data-choices data-choices-sorting-false class="form-select" name="user_id"  data-choices data-choices-sorting-false>
                                     <option value="">All Users</option>
                                     <?php foreach ($users as $user): ?>
                                         <option value="<?php echo $user['id']; ?>" <?php echo $filters['user_id'] == $user['id'] ? 'selected' : ''; ?>>
@@ -281,7 +281,7 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
 
                             <div class="col-md-2">
                                 <label class="form-label">Status</label>
-                                <select class="form-select" name="status">
+                                <select data-choices data-choices-sorting-false class="form-select" name="status">
                                     <option value="">All Status</option>
                                     <option value="pending" <?php echo $filters['status'] == 'pending' ? 'selected' : ''; ?>>Pending</option>
                                     <option value="confirmed" <?php echo $filters['status'] == 'confirmed' ? 'selected' : ''; ?>>Confirmed</option>
@@ -382,53 +382,6 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
                     </div>
                 </div>
 
-
-
-                <!-- Top Trainers Card -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="header-title">Top Performing Trainers</h4>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-centered table-nowrap mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Trainer</th>
-                                        <th>Total Sessions</th>
-                                        <th>Rating</th>
-                                        <th>Revenue</th>
-                                        <th>Performance</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($top_trainers as $trainer): ?>
-                                        <tr>
-                                            <td><?php echo htmlspecialchars($trainer['first_name'] . ' ' . $trainer['last_name']); ?></td>
-                                            <td><?php echo number_format($trainer['total_sessions']); ?></td>
-                                            <td>
-                                                <div class="text-warning">
-                                                    <?php
-                                                    $rating = round($trainer['avg_rating']);
-                                                    for ($i = 0; $i < 5; $i++) {
-                                                        echo $i < $rating ? '★' : '☆';
-                                                    }
-                                                    ?>
-                                                </div>
-                                            </td>
-                                            <td>₹<?php echo number_format($trainer['revenue']); ?></td>
-                                            <td>
-                                                <div class="progress" style="height: 5px;">
-                                                    <div class="progress-bar bg-success" style="width: <?php echo ($trainer['total_sessions'] / max(array_column($top_trainers, 'total_sessions'))) * 100; ?>%"></div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Detailed Reports Card -->
                 <div class="card">
