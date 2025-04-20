@@ -141,7 +141,7 @@ $users = mysqli_query($conn, $sql_users);
 $trainers = mysqli_query($conn, $sql_trainers);
 
 // Payment methods and statuses
-$payment_methods = ['credit_card', 'debit_card', 'upi', 'net_banking', 'wallet'];
+$payment_methods = ['credit_card', 'debit_card', 'upi', 'net_banking', 'wallet', 'Admin Scheduled'];
 $payment_statuses = ['pending', 'completed', 'failed', 'refunded'];
 
 // Calculate summary statistics
@@ -270,6 +270,12 @@ if (!$stats_result) {
                 <div class="row">
                     <div class="col-12">
                         <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item active">Transactions</li>
+                                </ol>
+                            </div>
                             <h4 class="page-title">Transactions</h4>
                         </div>
                     </div>

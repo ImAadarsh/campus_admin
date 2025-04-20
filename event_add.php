@@ -103,6 +103,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="row">
                     <div class="col-12">
                         <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="events.php">Events</a></li>
+                                    <li class="breadcrumb-item active">Add New Event</li>
+                                </ol>
+                            </div>
                             <h4 class="page-title">Add New Event</h4>
                         </div>
                     </div>

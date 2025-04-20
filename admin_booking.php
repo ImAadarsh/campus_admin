@@ -124,11 +124,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div class="page-content">
             <div class="page-container">
-                <div class="row mt-4">
+                <div class="row">
                     <div class="col-12">
-                        <div class="page-title-box d-flex align-items-center justify-content-between">
-                            <h4 class="mb-0">Schedule New Booking</h4>
-                        </div>
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="bookings.php">Bookings</a></li>
+                                    <li class="breadcrumb-item active">Schedule New Booking</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">Schedule New Booking</h4>
                     </div>
                 </div>
 

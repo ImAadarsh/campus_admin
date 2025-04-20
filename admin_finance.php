@@ -121,8 +121,20 @@ $transactions_result = mysqli_query($conn, $transactions_sql);
                 <!-- Overview Section -->
                 <div class="row mt-4">
                     <div class="col-12">
-                        <h4 class="mb-4">Financial Overview (Last 30 Days)</h4>
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item active">Financial Overview</li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">Financial Overview (Last 30 Days)</h4>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Revenue Metrics Section -->
+                <div class="row">
                     <div class="col-md-3 mb-4">
                         <div class="card metric-card bg-primary text-white">
                             <div class="card-body">

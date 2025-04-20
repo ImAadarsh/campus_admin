@@ -191,10 +191,16 @@ $specializations = mysqli_query($conn, $sql_specializations);
 
         <div class="page-content">
             <div class="page-container">
-                <div class="row">
+            <div class="row">
                     <div class="col-12">
                         <div class="page-title-box">
-                            <h4 class="page-title">Trainers</h4>
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="users.php">Trainers</a></li>
+                                </ol>
+                            </div>
+                            <h4 class="page-title">All Trainers</h4>
                         </div>
                     </div>
                 </div>

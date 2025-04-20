@@ -12,27 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 // Include database connection
 $conn = require_once 'config/config.php';
 
-// Check if ID is provided
-if (!isset($_GET['id'])) {
-    header("Location: users.php");
-    exit();
-}
-
-$user_id = mysqli_real_escape_string($conn, $_GET['id']);
-// Set user type based on URL parameter or default to 'user'
-$user_type = isset($_GET['type']) ? mysqli_real_escape_string($conn, $_GET['type']) : 'user';
-
-// Validate user type
-if (!in_array($user_type, ['admin', 'user'])) {
-    header("Location: users.php");
-    exit();
-}
-
-// Check if current user has permission to edit
-if ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_id'] != $user_id) {
-    header("Location: users.php");
-    exit();
-}
+$user_id = $_SESSION['user_id'];
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -44,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $city = mysqli_real_escape_string($conn, $_POST['city']);
     $country_code = mysqli_real_escape_string($conn, $_POST['country_code']);
     $grade = mysqli_real_escape_string($conn, $_POST['grade']);
+    $about = mysqli_real_escape_string($conn, $_POST['about']);
     
     // Update user information
     $update_query = "UPDATE users SET 
@@ -54,12 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         school = ?,
         city = ?,
         country_code = ?,
-        grade = ?
+        grade = ?,
+        about = ?
         WHERE id = ?";
     
     $stmt = mysqli_prepare($conn, $update_query);
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "ssssssssi", 
+        mysqli_stmt_bind_param($stmt, "sssssssssi", 
             $first_name, 
             $last_name, 
             $email, 
@@ -68,19 +50,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $city, 
             $country_code,
             $grade,
+            $about,
             $user_id
         );
         
         if (mysqli_stmt_execute($stmt)) {
-            $_SESSION['success_msg'] = "User updated successfully.";
-            if ($_SESSION['user_type'] === 'admin') {
-                header("Location: " . ($user_type === 'admin' ? 'admin_view.php' : 'users.php'));
-            } else {
-                header("Location: dashboard.php");
-            }
+            $_SESSION['success_msg'] = "Profile updated successfully.";
+            header("Location: profile.php");
             exit();
         } else {
-            $_SESSION['error_msg'] = "Failed to update user.";
+            $_SESSION['error_msg'] = "Failed to update profile.";
         }
         mysqli_stmt_close($stmt);
     }
@@ -95,13 +74,8 @@ if ($stmt) {
     $result = mysqli_stmt_get_result($stmt);
     $user = mysqli_fetch_assoc($result);
     mysqli_stmt_close($stmt);
-    
-    if (!$user) {
-        header("Location: users.php");
-        exit();
-    }
 } else {
-    header("Location: users.php");
+    header("Location: dashboard.php");
     exit();
 }
 ?>
@@ -111,8 +85,32 @@ if ($stmt) {
 
 <head>
     <meta charset="utf-8" />
-    <title>Edit User | Campus Coach</title>
+    <title>My Profile | Campus Coach</title>
     <?php include 'includes/head.php'; ?>
+    <style>
+        .profile-header {
+            background: linear-gradient(to right, #3283f6, #0e5bb7);
+            padding: 2rem 0;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .profile-info {
+            padding: 1rem;
+        }
+        .profile-stats {
+            border-right: 1px solid #eee;
+        }
+        .profile-stats:last-child {
+            border-right: none;
+        }
+    </style>
 </head>
 
 <body>
@@ -124,6 +122,17 @@ if ($stmt) {
 
         <div class="page-content">
             <div class="page-container">
+
+                <?php if (isset($_SESSION['success_msg'])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <?php 
+                        echo $_SESSION['success_msg'];
+                        unset($_SESSION['success_msg']);
+                        ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+
                 <?php if (isset($_SESSION['error_msg'])): ?>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <?php 
@@ -134,30 +143,68 @@ if ($stmt) {
                     </div>
                 <?php endif; ?>
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="page-title-box">
-                            <div class="page-title-right">
-                                <ol class="breadcrumb m-0">
-                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
-                                    <?php if ($_SESSION['user_type'] === 'admin'): ?>
-                                    <li class="breadcrumb-item">
-                                        <a href="<?php echo $user_type === 'admin' ? 'admin_view.php' : 'users.php'; ?>">
-                                            <?php echo ucfirst($user_type); ?> Management
-                                        </a>
-                                    </li>
-                                    <?php endif; ?>
-                                    <li class="breadcrumb-item active">Edit User</li>
-                                </ol>
+                <!-- Profile Header -->
+                <div class="profile-header mt-2">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <!-- use name initials -->
+                                <div style="font-size: 2rem; font-weight: bold; color: white; border-radius: 50%; background-color:rgb(0, 0, 0); padding: 1rem;" class="profile-initials">
+                                    <?php echo substr($user['first_name'], 0, 1) . substr($user['last_name'], 0, 1); ?>
+                                </div>
+                               
                             </div>
-                            <h4 class="page-title">Edit User</h4>
+                            <div class="col">
+                                <h2 class="mb-1"><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></h2>
+                                <p class="mb-0"><i class="ti ti-mail me-1"></i> <?php echo htmlspecialchars($user['email']); ?></p>
+                                <p class="mb-0"><i class="ti ti-phone me-1"></i> <?php echo htmlspecialchars($user['country_code'] . ' ' . $user['mobile']); ?></p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-12">
+                    <div class="col-xl-4 col-lg-5">
+                        <!-- Personal Information Card -->
                         <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Personal Information</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <strong>Full Name</strong>
+                                    <p><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Email</strong>
+                                    <p><?php echo htmlspecialchars($user['email']); ?></p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Phone</strong>
+                                    <p><?php echo htmlspecialchars($user['country_code'] . ' ' . $user['mobile']); ?></p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>School</strong>
+                                    <p><?php echo htmlspecialchars($user['school']); ?></p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Grade</strong>
+                                    <p><?php echo htmlspecialchars($user['grade']); ?></p>
+                                </div>
+                                <div class="mb-3">
+                                    <strong>Location</strong>
+                                    <p><?php echo htmlspecialchars($user['city']); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-8 col-lg-7">
+                        <!-- Edit Profile Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Edit Profile</h4>
+                            </div>
                             <div class="card-body">
                                 <form method="POST" action="">
                                     <div class="row">
@@ -188,8 +235,12 @@ if ($stmt) {
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="mobile" class="form-label">Mobile</label>
-                                                <input type="text" class="form-control" id="mobile" name="mobile" 
-                                                       value="<?php echo htmlspecialchars($user['mobile']); ?>" required>
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control w-25" id="country_code" name="country_code" 
+                                                           value="<?php echo htmlspecialchars($user['country_code']); ?>" required>
+                                                    <input type="text" class="form-control" id="mobile" name="mobile" 
+                                                           value="<?php echo htmlspecialchars($user['mobile']); ?>" required>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -204,23 +255,6 @@ if ($stmt) {
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="city" class="form-label">City</label>
-                                                <input type="text" class="form-control" id="city" name="city" 
-                                                       value="<?php echo htmlspecialchars($user['city']); ?>" required>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="country_code" class="form-label">Country Code</label>
-                                                <input type="text" class="form-control" id="country_code" name="country_code" 
-                                                       value="<?php echo htmlspecialchars($user['country_code']); ?>" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
                                                 <label for="grade" class="form-label">Grade</label>
                                                 <input type="text" class="form-control" id="grade" name="grade" 
                                                        value="<?php echo htmlspecialchars($user['grade']); ?>" required>
@@ -228,10 +262,19 @@ if ($stmt) {
                                         </div>
                                     </div>
 
+                                    <div class="mb-3">
+                                        <label for="city" class="form-label">City</label>
+                                        <input type="text" class="form-control" id="city" name="city" 
+                                               value="<?php echo htmlspecialchars($user['city']); ?>" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="about" class="form-label">About Me</label>
+                                        <textarea class="form-control" id="about" name="about" rows="4"><?php echo htmlspecialchars($user['about']); ?></textarea>
+                                    </div>
+
                                     <div class="text-end">
-                                        <a href="<?php echo $_SESSION['user_type'] === 'admin' ? ($user_type === 'admin' ? 'admin_view.php' : 'users.php') : 'dashboard.php'; ?>" 
-                                           class="btn btn-secondary me-2">Cancel</a>
-                                        <button type="submit" class="btn btn-primary">Update User</button>
+                                        <button type="submit" class="btn btn-primary">Update Profile</button>
                                     </div>
                                 </form>
                             </div>

@@ -154,7 +154,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="page-container">
                 <div class="row mt-4">
                     <div class="col-12">
-                        <div class="page-title-box d-flex justify-content-between align-items-center">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="trainers.php">Trainers</a></li>
+                                    <li class="breadcrumb-item active">Edit Trainer</li>
+                                </ol>
+                            </div>
                             <h4 class="page-title">Edit Trainer</h4>
                             <a href="view_trainer.php?id=<?php echo $trainerId; ?>" class="btn btn-secondary">
                                 <i class="ti ti-arrow-left me-1"></i> Back to Trainer

@@ -82,7 +82,14 @@ if (!$event) {
             <div class="page-container">
                 <div class="row">
                     <div class="col-12">
-                        <div class="page-title-box d-flex align-items-center justify-content-between">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="events.php">Events</a></li>
+                                    <li class="breadcrumb-item active">View Event</li>
+                                </ol>
+                            </div>
                             <h4 class="page-title">View Event</h4>
                             <div>
                                 <a href="events.php" class="btn btn-secondary me-2">Back to Events</a>

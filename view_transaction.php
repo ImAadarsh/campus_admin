@@ -101,10 +101,15 @@ if ($user_type !== 'admin' && $payment['user_id'] !== $user_id && $payment['trai
             <div class="page-container">
                 <div class="row">
                     <div class="col-12">
-                        <div class="page-title-head d-flex align-items-sm-center flex-sm-row flex-column">
-                            <div class="flex-grow-1">
-                                <h4 class="fs-18 text-uppercase fw-bold m-0">Transaction Details</h4>
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="transactions.php">Transactions</a></li>
+                                    <li class="breadcrumb-item active">Transaction Details</li>
+                                </ol>
                             </div>
+                            <h4 class="page-title">Transaction Details</h4>
                             <div class="mt-3 mt-sm-0">
                                 <a href="transactions.php" class="btn btn-outline-primary">
                                     <i class="ti ti-arrow-left me-1"></i> Back to Transactions
