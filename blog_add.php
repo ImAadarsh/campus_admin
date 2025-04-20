@@ -22,44 +22,78 @@ $categories = mysqli_query($conn, $sql);
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = mysqli_real_escape_string($conn, $_POST['title']);
-    $subtitle = mysqli_real_escape_string($conn, $_POST['subtitle']);
-    $content = mysqli_real_escape_string($conn, $_POST['content']);
+    $title = $_POST['title'];
+    $subtitle = $_POST['subtitle'];
+    $content = $_POST['content'];
     $category_id = (int)$_POST['category_id'];
-    $author_name = mysqli_real_escape_string($conn, $_POST['author_name']);
-    $quote = mysqli_real_escape_string($conn, $_POST['quote']);
-    $tags = mysqli_real_escape_string($conn, $_POST['tags']);
+    $author_name = $_POST['author_name'];
+    $quote = $_POST['quote'];
+    $tags = $_POST['tags'];
 
-    // Handle file uploads
-    $icon = '';
-    $banner = '';
+    // Prepare curl request
+    $curl = curl_init();
     
+    $postFields = array(
+        'token' => $_SESSION['token'],
+        'title' => $title,
+        'subtitle' => $subtitle,
+        'content' => $content,
+        'category_id' => $category_id,
+        'author_name' => $author_name,
+        'quote' => $quote,
+        'tags' => $tags
+    );
+    
+    // Handle file uploads
     if (isset($_FILES['icon']) && $_FILES['icon']['error'] === 0) {
-        $icon = 'public/blog/icon/' . uniqid() . basename($_FILES['icon']['name']);
-        move_uploaded_file($_FILES['icon']['tmp_name'], $icon);
+        $postFields['icon'] = new CURLFile($_FILES['icon']['tmp_name'], $_FILES['icon']['type'], $_FILES['icon']['name']);
     }
     
     if (isset($_FILES['banner']) && $_FILES['banner']['error'] === 0) {
-        $banner = 'public/blog/banner_image/' . uniqid() . basename($_FILES['banner']['name']);
-        move_uploaded_file($_FILES['banner']['tmp_name'], $banner);
+        $postFields['banner'] = new CURLFile($_FILES['banner']['tmp_name'], $_FILES['banner']['type'], $_FILES['banner']['name']);
     }
 
-    $sql = "INSERT INTO blogs (title, subtitle, content, category_id, author_name, 
-            icon, banner, quote, tags, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => API_BASE_URL . '/api/insertBlog',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => $postFields,
+    ));
     
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "sssisssss", 
-        $title, $subtitle, $content, $category_id, $author_name, 
-        $icon, $banner, $quote, $tags
-    );
-
-    if (mysqli_stmt_execute($stmt)) {
-        header("Location: blogs.php");
-        exit();
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+    $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    
+    if ($err) {
+        $error = "Error adding blog: " . $err;
+    } else if ($http_code != 200 && $http_code != 201) {
+        // 201 is "Created" - a success response for resource creation
+        $error = "HTTP Error: " . $http_code . " - Response: " . $response;
     } else {
-        $error = "Error adding blog: " . mysqli_error($conn);
+        // For debugging
+        // Uncomment the next line to see the raw response
+        // $error = "API Response: " . $response;
+        
+        $responseData = json_decode($response, true);
+        if (!$responseData) {
+            $error = "JSON parsing error. Raw response: " . substr($response, 0, 200) . "...";
+        } else if (isset($responseData['status']) && $responseData['status']) {
+            header("Location: blogs.php");
+            exit();
+        } else {
+            $message = isset($responseData['message']) ? $responseData['message'] : 'Unknown error';
+            $error = "Error adding blog: " . $message;
+            // Uncomment for more details about the response
+            // $error .= "<br>Full response: " . json_encode($responseData);
+        }
     }
+    
+    curl_close($curl);
 }
 ?>
 
