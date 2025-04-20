@@ -1,6 +1,6 @@
 <?php
 // Database configuration
-$host = "localhost";
+$host = "89.117.157.103";
 $user = "u334258298_campus_coach";
 $password = "1@CampusCoach";
 $dbname = "u334258298_campus_coach";
