@@ -5,19 +5,23 @@ $user = "u334258298_campus_coach";
 $password = "1@CampusCoach";
 $dbname = "u334258298_campus_coach";
 
-// Create connection
-$conn = mysqli_connect($host, $user, $password, $dbname);
+// Create connection with forced charset and collation
+$conn = mysqli_init();
+mysqli_options($conn, MYSQLI_INIT_COMMAND, "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+mysqli_options($conn, MYSQLI_INIT_COMMAND, "SET collation_connection = utf8mb4_unicode_ci");
+mysqli_real_connect($conn, $host, $user, $password, $dbname);
 
 // Check connection
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Set character set and collation for the connection
+// Force collation settings
 mysqli_query($conn, "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 mysqli_query($conn, "SET CHARACTER SET utf8mb4");
 mysqli_query($conn, "SET collation_connection = utf8mb4_unicode_ci");
 mysqli_query($conn, "SET SESSION collation_connection = utf8mb4_unicode_ci");
+mysqli_query($conn, "SET @@collation_connection = utf8mb4_unicode_ci");
 
 $uri = 'https://backend.campuscoach.in/storage/app/';
 date_default_timezone_set('Asia/Kolkata');
