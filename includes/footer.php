@@ -10,6 +10,3 @@
     <!-- Projects Analytics Dashboard App js -->
     <script src="assets/js/pages/dashboard-sales.js"></script>
 
-</body>
-
-</html>

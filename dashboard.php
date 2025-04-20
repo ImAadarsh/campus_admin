@@ -1207,16 +1207,46 @@ if ($userType === 'admin') {
     <!-- Theme Settings -->
     <?php include 'includes/theme_settings.php'; ?>
 
-    <!-- Vendor js -->
-    <script src="assets/js/vendor.min.js"></script>
+    <!-- Core JS -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="assets/vendor/jquery/jquery.min.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
 
-    <!-- App js -->
-    <script src="assets/js/app.min.js"></script>
 
     <!-- Apex Charts js -->
     <script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
 
+
+
+    <!-- Initialize Bootstrap Components -->
     <script>
+        // Initialize all popovers
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl, {
+                container: 'body'
+            })
+        });
+
+        // Initialize all tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                container: 'body'
+            })
+        });
+
+        // Initialize all dropdowns
+        var dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
+        var dropdownList = dropdownTriggerList.map(function (dropdownTriggerEl) {
+            return new bootstrap.Dropdown(dropdownTriggerEl, {
+                popperConfig: {
+                    strategy: 'fixed'
+                }
+            })
+        });
+
         // Booking Statistics Chart
         var options = {
             series: [{

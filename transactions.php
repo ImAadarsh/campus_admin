@@ -600,8 +600,7 @@ if (!$stats_result) {
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-    <!-- App js -->
-    <script src="assets/js/app.min.js"></script>
+
 
     <script>
         $(document).ready(function() {

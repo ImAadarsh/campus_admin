@@ -474,9 +474,6 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
 
     <?php include 'includes/theme_settings.php'; ?>
 
-    <!-- Vendor js -->
-    <script src="assets/js/vendor.min.js"></script>
-    <script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
