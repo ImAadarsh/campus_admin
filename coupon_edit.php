@@ -1,4 +1,5 @@
 <?php
+include 'config/show_errors.php';
 session_start();
 // Include database connection
 require_once 'config/config.php';
