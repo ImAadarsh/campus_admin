@@ -16,12 +16,12 @@ if (!$conn) {
 // Set charset to utf8mb4
 mysqli_set_charset($conn, "utf8mb4");
 
-$uri = 'http://127.0.0.1/campus-coach/BACKEND_API/storage/app/';
+$uri = 'https://backend.campuscoach.in/storage/app/';
 date_default_timezone_set('Asia/Kolkata');
 $current_time = time();
 
 // API Configuration
-define('API_BASE_URL', 'http://127.0.0.1:8000');
+define('API_BASE_URL', 'https://backend.campuscoach.in/public');
 define('API_TOKEN', 'your_api_token_here');
 
 // Common API calling method
@@ -89,7 +89,7 @@ function callAPI1($method, $urlpoint, $data, $token){
         $token = "";
     }
     
-    $url = 'http://127.0.0.1:8000/api/'.$urlpoint.'';
+    $url = 'https://backend.campuscoach.in/public/api/'.$urlpoint.'';
     $curl = curl_init($url);
     switch ($method){
        case "POST":

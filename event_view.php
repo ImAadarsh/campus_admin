@@ -17,9 +17,6 @@ $userType = $_SESSION['user_type'];
 $userName = $_SESSION['user_name'];
 $userId = $_SESSION['user_id'];
 
-// Base URL for images
-$uri = "http://127.0.0.1:8000/";
-
 // Check if event ID is provided
 if (!isset($_GET['id'])) {
     header("Location: events.php");
