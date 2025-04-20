@@ -1,9 +1,9 @@
 <?php
 // Database configuration
-$host = "82.180.142.204";
-$user = "u954141192_campus_coach";
+$host = "localhost";
+$user = "u334258298_campus_coach";
 $password = "1@CampusCoach";
-$dbname = "u954141192_campus_coach";
+$dbname = "u334258298_campus_coach";
 
 // Create connection
 $conn = mysqli_connect($host, $user, $password, $dbname);
