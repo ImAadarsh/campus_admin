@@ -66,7 +66,7 @@ if ($stmt === false) {
 }
 
 // Fetch assigned users
-$users_query = "SELECT u.id, u.name 
+$users_query = "SELECT u.id, CONCAT(u.first_name, ' ', u.last_name) AS name 
                FROM users u 
                JOIN user_coupons uc ON u.id = uc.user_id 
                WHERE uc.coupon_id = ?";
