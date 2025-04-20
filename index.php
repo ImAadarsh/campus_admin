@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <a href="index.php" class="auth-brand mb-3">
                    
                             <span class="logo-lg"><span class="logo-text">Campus Coach</span></span>
-                            <span class="logo-sm"><span class="logo-text-sm">CC</span></span>
+                         
                    
                     </a>
 
@@ -120,7 +120,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
                     <p class="mt-auto mb-0">
-                        <script>document.write(new Date().getFullYear())</script> © Campus Coach - By <span class="fw-bold text-decoration-underline text-uppercase text-reset fs-12">Endeavour Digital</span>
+                        <script>document.write(new Date().getFullYear())</script> © Campus Coach - Developed By <span class="fw-bold text-decoration-underline text-uppercase text-reset fs-12">Endeavour Digital</span>
                     </p>
                 </div>
             </div>
