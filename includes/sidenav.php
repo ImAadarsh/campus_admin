@@ -122,33 +122,57 @@
 
         <li class="side-nav-title">Payments & Transactions</li>
 
-<!-- Reports -->
-<li class="side-nav-item">
-    <a data-bs-toggle="collapse" href="#sidebarTransactions" aria-expanded="false" aria-controls="sidebarTransactions" class="side-nav-link">
-        <span class="menu-icon"><i class="ti ti-report"></i></span>
-        <span class="menu-text">Transactions</span>
-        <span class="menu-arrow"></span>
-    </a>
-    <div class="collapse" id="sidebarTransactions">
-        <ul class="sub-menu">
-            <li class="side-nav-item">
-                <a href="transactions.php" class="side-nav-link">
-                    <span class="menu-text">All Transactions</span>
-                </a>
-            </li>
-            <li class="side-nav-item">
-                <a href="transactions.php?status=Pending" class="side-nav-link">
-                    <span class="menu-text">Pending Payments</span>
-                </a>
-            </li>
-            <li class="side-nav-item">
-                <a href="transactions.php?payment_method=Admin+Scheduled" class="side-nav-link">
-                    <span class="menu-text">Admin Payments</span>
-                </a>
-            </li>
-        </ul>
-    </div>
-</li>
+        <!-- Coupons -->
+        <li class="side-nav-item">
+            <a data-bs-toggle="collapse" href="#sidebarCoupons" aria-expanded="false" aria-controls="sidebarCoupons" class="side-nav-link">
+                <span class="menu-icon"><i class="ti ti-discount"></i></span>
+                <span class="menu-text">Coupons</span>
+                <span class="menu-arrow"></span>
+            </a>
+            <div class="collapse" id="sidebarCoupons">
+                <ul class="sub-menu">
+                    <li class="side-nav-item">
+                        <a href="coupons.php" class="side-nav-link">
+                            <span class="menu-text">All Coupons</span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href="coupon_add.php" class="side-nav-link">
+                            <span class="menu-text">Add New Coupon</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
+        <!-- Reports -->
+        <li class="side-nav-item">
+            <a data-bs-toggle="collapse" href="#sidebarTransactions" aria-expanded="false" aria-controls="sidebarTransactions" class="side-nav-link">
+                <span class="menu-icon"><i class="ti ti-report"></i></span>
+                <span class="menu-text">Transactions</span>
+                <span class="menu-arrow"></span>
+            </a>
+            <div class="collapse" id="sidebarTransactions">
+                <ul class="sub-menu">
+                    <li class="side-nav-item">
+                        <a href="transactions.php" class="side-nav-link">
+                            <span class="menu-text">All Transactions</span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href="transactions.php?status=Pending" class="side-nav-link">
+                            <span class="menu-text">Pending Payments</span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href="transactions.php?payment_method=Admin+Scheduled" class="side-nav-link">
+                            <span class="menu-text">Admin Payments</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
         <li class="side-nav-title">Reports & Analytics</li>
 
         <!-- Reports -->

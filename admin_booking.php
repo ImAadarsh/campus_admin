@@ -136,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <h4 class="page-title">Schedule New Booking</h4>
                     </div>
                 </div>
+                
 
                 <?php if (isset($_SESSION['success'])) : ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
