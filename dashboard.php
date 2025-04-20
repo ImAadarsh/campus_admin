@@ -440,104 +440,256 @@ if ($userType === 'admin') {
     }
 }
 
+// Debug function
+function debug_print($message, $data = null) {
+    echo "<pre style='background: #f5f5f5; padding: 10px; margin: 5px; border: 1px solid #ddd;'>";
+    echo "DEBUG: " . $message . "\n";
+    if ($data !== null) {
+        echo "Data: ";
+        print_r($data);
+    }
+    echo "</pre>";
+}
+
 // Get activity timeline
-$timelineQuery = "";
+debug_print("User Type", $userType);
+debug_print("User ID", $userId);
+
+$timeline = [];
+
 if ($userType === 'admin') {
-    $timelineQuery = "SELECT type, date, user_name, trainer_name, status FROM (
-        SELECT 
-        CAST('booking' AS CHAR(10)) as type,
+    // First get bookings
+    $bookingsQuery = "SELECT 
+        'booking' as type,
         b.created_at as date,
-        CAST(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS CHAR(100)) as user_name,
-        CAST(CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) AS CHAR(100)) as trainer_name,
-        CAST(COALESCE(b.status, '') AS CHAR(20)) as status
+        u.first_name as user_fname,
+        u.last_name as user_lname,
+        t.first_name as trainer_fname,
+        t.last_name as trainer_lname,
+        b.status
         FROM bookings b
         JOIN users u ON b.user_id = u.id
         JOIN time_slots ts ON b.time_slot_id = ts.id
         JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
         JOIN trainers t ON ta.trainer_id = t.id
-    ) AS bookings_data
-    UNION ALL 
-    SELECT type, date, user_name, trainer_name, status FROM (
-        SELECT 
-        CAST('review' AS CHAR(10)) as type,
+        ORDER BY b.created_at DESC
+        LIMIT 5";
+    
+    debug_print("Admin Bookings Query", $bookingsQuery);
+    $result = mysqli_query($conn, $bookingsQuery);
+    if (!$result) {
+        debug_print("Bookings Query Error", mysqli_error($conn));
+    } else {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $timeline[] = [
+                'type' => 'booking',
+                'date' => $row['date'],
+                'user_name' => $row['user_fname'] . ' ' . $row['user_lname'],
+                'trainer_name' => $row['trainer_fname'] . ' ' . $row['trainer_lname'],
+                'status' => $row['status']
+            ];
+        }
+    }
+
+    // Then get reviews
+    $reviewsQuery = "SELECT 
+        'review' as type,
         tr.created_at as date,
-        CAST(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS CHAR(100)) as user_name,
-        CAST(CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) AS CHAR(100)) as trainer_name,
-        CAST(COALESCE(tr.rating, 0) AS CHAR(20)) as status
+        u.first_name as user_fname,
+        u.last_name as user_lname,
+        t.first_name as trainer_fname,
+        t.last_name as trainer_lname,
+        tr.rating as status
         FROM trainer_reviews tr
         JOIN users u ON tr.user_id = u.id
         JOIN trainers t ON tr.trainer_id = t.id
-    ) AS reviews_data
-    ORDER BY date DESC
-    LIMIT 10";
+        ORDER BY tr.created_at DESC
+        LIMIT 5";
+    
+    debug_print("Admin Reviews Query", $reviewsQuery);
+    $result = mysqli_query($conn, $reviewsQuery);
+    if (!$result) {
+        debug_print("Reviews Query Error", mysqli_error($conn));
+    } else {
+        while ($row = mysqli_fetch_assoc($result)) {
+            $timeline[] = [
+                'type' => 'review',
+                'date' => $row['date'],
+                'user_name' => $row['user_fname'] . ' ' . $row['user_lname'],
+                'trainer_name' => $row['trainer_fname'] . ' ' . $row['trainer_lname'],
+                'status' => $row['status']
+            ];
+        }
+    }
+
 } elseif ($userType === 'trainer') {
-    $timelineQuery = "SELECT type, date, user_name, trainer_name, status FROM (
-        SELECT 
-        CAST('booking' AS CHAR(10)) as type,
+    // Get trainer's bookings
+    $stmt = mysqli_prepare($conn, "SELECT 
+        'booking' as type,
         b.created_at as date,
-        CAST(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS CHAR(100)) as user_name,
-        CAST('' AS CHAR(100)) as trainer_name,
-        CAST(COALESCE(b.status, '') AS CHAR(20)) as status
+        u.first_name as user_fname,
+        u.last_name as user_lname,
+        b.status
         FROM bookings b
         JOIN users u ON b.user_id = u.id
         JOIN time_slots ts ON b.time_slot_id = ts.id
         JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
         WHERE ta.trainer_id = ?
-    ) AS bookings_data
-    UNION ALL 
-    SELECT type, date, user_name, trainer_name, status FROM (
-        SELECT 
-        CAST('review' AS CHAR(10)) as type,
+        ORDER BY b.created_at DESC
+        LIMIT 5");
+
+    debug_print("Trainer ID for bookings query", $userId);
+    
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, "i", $userId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        if (!$result) {
+            debug_print("Trainer Bookings Query Error", mysqli_error($conn));
+        } else {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $timeline[] = [
+                    'type' => 'booking',
+                    'date' => $row['date'],
+                    'user_name' => $row['user_fname'] . ' ' . $row['user_lname'],
+                    'trainer_name' => '',
+                    'status' => $row['status']
+                ];
+            }
+        }
+        mysqli_stmt_close($stmt);
+    } else {
+        debug_print("Trainer Bookings Statement Error", mysqli_error($conn));
+    }
+
+    // Get trainer's reviews
+    $stmt = mysqli_prepare($conn, "SELECT 
+        'review' as type,
         tr.created_at as date,
-        CAST(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS CHAR(100)) as user_name,
-        CAST('' AS CHAR(100)) as trainer_name,
-        CAST(COALESCE(tr.rating, 0) AS CHAR(20)) as status
+        u.first_name as user_fname,
+        u.last_name as user_lname,
+        tr.rating as status
         FROM trainer_reviews tr
         JOIN users u ON tr.user_id = u.id
         WHERE tr.trainer_id = ?
-    ) AS reviews_data
-    ORDER BY date DESC
-    LIMIT 10";
+        ORDER BY tr.created_at DESC
+        LIMIT 5");
+
+    debug_print("Trainer ID for reviews query", $userId);
+    
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, "i", $userId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        if (!$result) {
+            debug_print("Trainer Reviews Query Error", mysqli_error($conn));
+        } else {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $timeline[] = [
+                    'type' => 'review',
+                    'date' => $row['date'],
+                    'user_name' => $row['user_fname'] . ' ' . $row['user_lname'],
+                    'trainer_name' => '',
+                    'status' => (string)$row['status']
+                ];
+            }
+        }
+        mysqli_stmt_close($stmt);
+    } else {
+        debug_print("Trainer Reviews Statement Error", mysqli_error($conn));
+    }
+
 } else {
-    $timelineQuery = "SELECT type, date, user_name, trainer_name, status FROM (
-        SELECT 
-        CAST('booking' AS CHAR(10)) as type,
+    // Get user's bookings
+    $stmt = mysqli_prepare($conn, "SELECT 
+        'booking' as type,
         b.created_at as date,
-        CAST('' AS CHAR(100)) as user_name,
-        CAST(CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) AS CHAR(100)) as trainer_name,
-        CAST(COALESCE(b.status, '') AS CHAR(20)) as status
+        t.first_name as trainer_fname,
+        t.last_name as trainer_lname,
+        b.status
         FROM bookings b
         JOIN time_slots ts ON b.time_slot_id = ts.id
         JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
         JOIN trainers t ON ta.trainer_id = t.id
         WHERE b.user_id = ?
-    ) AS bookings_data
-    UNION ALL 
-    SELECT type, date, user_name, trainer_name, status FROM (
-        SELECT 
-        CAST('review' AS CHAR(10)) as type,
+        ORDER BY b.created_at DESC
+        LIMIT 5");
+
+    debug_print("User ID for bookings query", $userId);
+    
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, "i", $userId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        if (!$result) {
+            debug_print("User Bookings Query Error", mysqli_error($conn));
+        } else {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $timeline[] = [
+                    'type' => 'booking',
+                    'date' => $row['date'],
+                    'user_name' => '',
+                    'trainer_name' => $row['trainer_fname'] . ' ' . $row['trainer_lname'],
+                    'status' => $row['status']
+                ];
+            }
+        }
+        mysqli_stmt_close($stmt);
+    } else {
+        debug_print("User Bookings Statement Error", mysqli_error($conn));
+    }
+
+    // Get user's reviews
+    $stmt = mysqli_prepare($conn, "SELECT 
+        'review' as type,
         tr.created_at as date,
-        CAST('' AS CHAR(100)) as user_name,
-        CAST(CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) AS CHAR(100)) as trainer_name,
-        CAST(COALESCE(tr.rating, 0) AS CHAR(20)) as status
+        t.first_name as trainer_fname,
+        t.last_name as trainer_lname,
+        tr.rating as status
         FROM trainer_reviews tr
         JOIN trainers t ON tr.trainer_id = t.id
         WHERE tr.user_id = ?
-    ) AS reviews_data
-    ORDER BY date DESC
-    LIMIT 10";
+        ORDER BY tr.created_at DESC
+        LIMIT 5");
+
+    debug_print("User ID for reviews query", $userId);
+    
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, "i", $userId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        if (!$result) {
+            debug_print("User Reviews Query Error", mysqli_error($conn));
+        } else {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $timeline[] = [
+                    'type' => 'review',
+                    'date' => $row['date'],
+                    'user_name' => '',
+                    'trainer_name' => $row['trainer_fname'] . ' ' . $row['trainer_lname'],
+                    'status' => (string)$row['status']
+                ];
+            }
+        }
+        mysqli_stmt_close($stmt);
+    } else {
+        debug_print("User Reviews Statement Error", mysqli_error($conn));
+    }
 }
 
-$timeline = [];
-if ($userType === 'admin') {
-    $result = mysqli_query($conn, $timelineQuery);
-    $timeline = mysqli_fetch_all($result, MYSQLI_ASSOC);
-} else {
-    $stmt = mysqli_prepare($conn, $timelineQuery);
-    mysqli_stmt_bind_param($stmt, "ii", $userId, $userId);
-    mysqli_stmt_execute($stmt);
-    $timeline = mysqli_stmt_get_result($stmt)->fetch_all(MYSQLI_ASSOC);
-}
+// Sort combined timeline by date
+usort($timeline, function($a, $b) {
+    return strtotime($b['date']) - strtotime($a['date']);
+});
+
+// Keep only the first 10 items
+$timeline = array_slice($timeline, 0, 10);
+
+debug_print("Final Timeline Data", $timeline);
 ?>
 
 <!DOCTYPE html>
