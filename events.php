@@ -19,7 +19,7 @@ $userId = $_SESSION['user_id'];
 
 
 // Fetch events
-$sql = "SELECT * FROM events ORDER BY date_time DESC";
+$sql = "SELECT * FROM events ORDER BY id DESC";
 $result = mysqli_query($conn, $sql);
 
 if (!$result) {
@@ -37,10 +37,34 @@ if (!$result) {
     <?php include 'includes/head.php'; ?>
     <!-- DataTables CSS -->
     <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet" type="text/css" />
     <style>
         .event-image {
             max-width: 100px;
             height: auto;
+        }
+        @media (max-width: 768px) {
+            .event-image {
+                max-width: 60px;
+            }
+            .btn-sm {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+                margin: 2px 0;
+                display: inline-block;
+            }
+            .dtr-details {
+                width: 100%;
+            }
+            .dtr-details li {
+                display: flex;
+                justify-content: space-between;
+                padding: 8px 0;
+                border-bottom: 1px solid #eee;
+            }
+            .dtr-details li:last-child {
+                border-bottom: none;
+            }
         }
     </style>
 </head>
@@ -85,7 +109,7 @@ if (!$result) {
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <table id="events-table" class="table table-striped table-bordered">
+                                <table id="events-table" class="table table-striped table-bordered dt-responsive nowrap">
                                     <thead>
                                         <tr>
                                             <th>Image</th>
@@ -103,16 +127,22 @@ if (!$result) {
                                                          alt="Event Image" 
                                                          class="event-image">
                                                 </td>
-                                                <td><?php echo htmlspecialchars($row['name']); ?></td>
+                                                <td data-order="<?php echo htmlspecialchars($row['name']); ?>">
+                                                    <?php echo htmlspecialchars($row['name']); ?>
+                                                </td>
                                                 <td><?php echo htmlspecialchars($row['location']); ?></td>
-                                                <td><?php echo date('M d, Y H:i', strtotime($row['date_time'])); ?></td>
+                                                <td data-order="<?php echo strtotime($row['event_start']); ?>">
+                                                    <?php echo date('M d, Y H:i', strtotime($row['event_start'])); ?>
+                                                </td>
                                                 <td>
-                                                    <a href="event_view.php?id=<?php echo $row['id']; ?>" 
-                                                       class="btn btn-sm btn-info">View</a>
-                                                    <a href="event_edit.php?id=<?php echo $row['id']; ?>" 
-                                                       class="btn btn-sm btn-primary">Edit</a>
-                                                    <button onclick="deleteEvent(<?php echo $row['id']; ?>)" 
-                                                            class="btn btn-sm btn-danger">Delete</button>
+                                                    <div class="d-flex gap-1 flex-wrap">
+                                                        <a href="event_view.php?id=<?php echo $row['id']; ?>" 
+                                                           class="btn btn-sm btn-info">View</a>
+                                                        <a href="event_edit.php?id=<?php echo $row['id']; ?>" 
+                                                           class="btn btn-sm btn-primary">Edit</a>
+                                                        <button onclick="deleteEvent(<?php echo $row['id']; ?>)" 
+                                                                class="btn btn-sm btn-danger">Delete</button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         <?php endwhile; ?>
@@ -136,11 +166,20 @@ if (!$result) {
     <!-- DataTables js -->
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
 
     <script>
         $(document).ready(function() {
             $('#events-table').DataTable({
-                "order": [[3, "desc"]]
+                responsive: true,
+                order: [[3, "desc"]],
+                columnDefs: [
+                    { responsivePriority: 1, targets: [1, 4] }, // Name and Actions columns
+                    { responsivePriority: 2, targets: 0 }, // Image column
+                    { responsivePriority: 3, targets: 3 }, // Date column
+                    { responsivePriority: 4, targets: 2 }  // Location column
+                ]
             });
         });
 

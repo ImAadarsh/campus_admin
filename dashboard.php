@@ -404,18 +404,20 @@ if ($userType === 'admin') {
         (($currentMonthRevenue - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
 
     // Get top performing trainers
-    $sql = "SELECT t.*, 
-            COUNT(b.id) as total_bookings,
-            SUM(CASE WHEN b.status = 'completed' THEN 1 ELSE 0 END) as completed_sessions,
-            AVG(tr.rating) as avg_rating
-            FROM trainers t
-            LEFT JOIN trainer_availabilities ta ON t.id = ta.trainer_id
-            LEFT JOIN time_slots ts ON ta.id = ts.trainer_availability_id
-            LEFT JOIN bookings b ON ts.id = b.time_slot_id
-            LEFT JOIN trainer_reviews tr ON t.id = tr.trainer_id
-            GROUP BY t.id
-            ORDER BY total_bookings DESC
-            LIMIT 5";
+    $sql = "SELECT 
+        t.*,
+        COALESCE(COUNT(DISTINCT b.id), 0) as total_bookings,
+        COALESCE(SUM(CASE WHEN b.status = 'completed' THEN 1 ELSE 0 END), 0) as completed_sessions,
+        COALESCE(AVG(tr.rating), 0) as avg_rating,
+        COALESCE(COUNT(DISTINCT tr.id), 0) as total_reviews
+    FROM trainers t
+    LEFT JOIN trainer_availabilities ta ON t.id = ta.trainer_id
+    LEFT JOIN time_slots ts ON ta.id = ts.trainer_availability_id
+    LEFT JOIN bookings b ON ts.id = b.time_slot_id
+    LEFT JOIN trainer_reviews tr ON t.id = tr.trainer_id
+    GROUP BY t.id
+    ORDER BY total_bookings DESC, avg_rating DESC
+    LIMIT 5";
     $result = mysqli_query($conn, $sql);
     $topTrainers = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
@@ -1108,8 +1110,8 @@ if ($userType === 'admin') {
                                                             echo $i < $rating ? '★' : '☆';
                                                         }
                                                         ?>
-                                    </div>
-                                                </td>
+                                                            </div>
+                                                        </td>
                                                 <td>
                                                     <?php 
                                                     $performance = $trainer['total_bookings'] > 0 ? 

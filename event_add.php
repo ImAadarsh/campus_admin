@@ -19,35 +19,66 @@ $userId = $_SESSION['user_id'];
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = mysqli_real_escape_string($conn, $_POST['name']);
-    $location = mysqli_real_escape_string($conn, $_POST['location']);
-    $date_time = mysqli_real_escape_string($conn, $_POST['date_time']);
-    $link = mysqli_real_escape_string($conn, $_POST['link']);
+    $name = $_POST['name'];
+    $location = $_POST['location'];
+    $event_start = $_POST['date_time'];
+    $link = $_POST['link'];
 
     // Handle image upload
-    $image = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        $image = 'public/events/images/' . uniqid() . basename($_FILES['image']['name']);
-        if (!move_uploaded_file($_FILES['image']['tmp_name'], $image)) {
-            $_SESSION['error'] = "Failed to upload image";
-            header("Location: events.php");
-            exit();
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => API_BASE_URL.'/api/insertEvent',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => array(
+                'token' => $_SESSION['token'],
+                'name' => $name,
+                'location' => $location,
+                'link' => $link,
+                'event_start' => $event_start,
+                'image' => new CURLFILE($_FILES['image']['tmp_name'])
+            ),
+            CURLOPT_HTTPHEADER => array(
+                'Accept: application/json',
+                'Authorization: Bearer ' . $_SESSION['token']
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+
+        $result = json_decode($response, true);
+
+        if ($http_code === 200) {
+            // Insert into local database for sync
+            $image_path = $result['data']['image'] ?? '';
+            $sql = "INSERT INTO events (name, location, date_time, image, link, created_at, updated_at) 
+                    VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+            $stmt = mysqli_prepare($conn, $sql);
+            mysqli_stmt_bind_param($stmt, "sssss", $name, $location, $event_start, $image_path, $link);
+            
+            if (mysqli_stmt_execute($stmt)) {
+                $_SESSION['success'] = "Event added successfully";
+            } else {
+                $_SESSION['error'] = "Error syncing event to local database";
+            }
+        } else {
+            $_SESSION['error'] = "Adding event: " . ($result['message'] ?? 'Unknown error');
         }
-    }
-
-    // Insert event
-    $sql = "INSERT INTO events (name, location, date_time, image, link, created_at, updated_at) 
-            VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "sssss", $name, $location, $date_time, $image, $link);
-
-    if (mysqli_stmt_execute($stmt)) {
-        $_SESSION['success'] = "Event added successfully";
-        header("Location: events.php");
-        exit();
     } else {
-        $_SESSION['error'] = "Error adding event: " . mysqli_error($conn);
+        $_SESSION['error'] = "Please select an image file";
     }
+    
+    header("Location: events.php");
+    exit();
 }
 ?>
 
@@ -93,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="date_time" class="form-label">Date & Time</label>
+                                        <label for="date_time" class="form-label">Event Start Date & Time</label>
                                         <input type="text" class="form-control" id="date_time" name="date_time" required>
                                     </div>
 

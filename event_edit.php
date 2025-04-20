@@ -17,8 +17,6 @@ $userType = $_SESSION['user_type'];
 $userName = $_SESSION['user_name'];
 $userId = $_SESSION['user_id'];
 
-// Base URL for images
-$uri = "http://127.0.0.1:8000/";
 
 // Check if event ID is provided
 if (!isset($_GET['id'])) {
@@ -43,39 +41,73 @@ if (!$event) {
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = mysqli_real_escape_string($conn, $_POST['name']);
-    $location = mysqli_real_escape_string($conn, $_POST['location']);
-    $date_time = mysqli_real_escape_string($conn, $_POST['date_time']);
-    $link = mysqli_real_escape_string($conn, $_POST['link']);
+    $name = $_POST['name'];
+    $location = $_POST['location'];
+    $event_start = $_POST['date_time'];
+    $link = $_POST['link'];
 
-    // Handle image upload
-    $image = $event['image'];
-    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
-        $image = 'public/events/images/' . uniqid() . basename($_FILES['image']['name']);
-        if (!move_uploaded_file($_FILES['image']['tmp_name'], $image)) {
-            $_SESSION['error'] = "Failed to upload image";
-            header("Location: events.php");
-            exit();
-        }
-    }
-
-    // Update event
-    $sql = "UPDATE events SET 
-            name = ?, location = ?, date_time = ?, 
-            image = ?, link = ?, updated_at = NOW() 
-            WHERE id = ?";
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "sssssi", 
-        $name, $location, $date_time, $image, $link, $event_id
+    $postFields = array(
+        'token' => $_SESSION['token'],
+        'id' => $event_id,
+        'name' => $name,
+        'location' => $location,
+        'link' => $link,
+        'event_start' => $event_start
     );
 
-    if (mysqli_stmt_execute($stmt)) {
-        $_SESSION['success'] = "Event updated successfully";
-        header("Location: events.php");
-        exit();
-    } else {
-        $_SESSION['error'] = "Error updating event: " . mysqli_error($conn);
+    // Add image if new one is uploaded
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        $postFields['image'] = new CURLFILE($_FILES['image']['tmp_name']);
     }
+
+    $curl = curl_init();
+
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => API_BASE_URL.'/api/insertEvent',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => $postFields,
+        CURLOPT_HTTPHEADER => array(
+            'Accept: application/json',
+            'Authorization: Bearer ' . $_SESSION['token']
+        ),
+    ));
+
+    $response = curl_exec($curl);
+    $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+
+    $result = json_decode($response, true);
+
+    if ($http_code === 200 && isset($result['success']) && $result['success']) {
+        // Update local database for sync
+        $image_path = isset($_FILES['image']) ? ($result['data']['image'] ?? $event['image']) : $event['image'];
+        
+        $sql = "UPDATE events SET 
+                name = ?, location = ?, date_time = ?, 
+                image = ?, link = ?, updated_at = NOW() 
+                WHERE id = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, "sssssi", 
+            $name, $location, $event_start, $image_path, $link, $event_id
+        );
+        
+        if (mysqli_stmt_execute($stmt)) {
+            $_SESSION['success'] = "Event updated successfully";
+        } else {
+            $_SESSION['error'] = "Error syncing event to local database";
+        }
+    } else {
+        $_SESSION['error'] = "Updating event: " . ($result['message'] ?? 'Unknown error');
+    }
+
+    header("Location: events.php");
+    exit();
 }
 ?>
 
@@ -123,9 +155,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="date_time" class="form-label">Date & Time</label>
+                                        <label for="date_time" class="form-label">Event Start Date & Time</label>
                                         <input type="text" class="form-control" id="date_time" name="date_time" 
-                                               value="<?php echo date('Y-m-d H:i', strtotime($event['date_time'])); ?>" required>
+                                               value="<?php echo $event['event_start']; ?>" required>
                                     </div>
 
                                     <div class="mb-3">
@@ -137,6 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             </div>
                                         <?php endif; ?>
                                         <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                                        <small class="text-muted">Leave empty to keep current image</small>
                                         <div id="imagePreview" class="mt-2"></div>
                                     </div>
 
