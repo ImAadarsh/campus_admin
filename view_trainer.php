@@ -205,6 +205,20 @@ while ($booking = mysqli_fetch_assoc($bookings_result)) {
 
         <div class="page-content">
             <div class="page-container">
+            <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box">
+                            <div class="page-title-right">
+                                <ol class="breadcrumb m-0">
+                                    <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
+                                    <li class="breadcrumb-item"><a href="trainers.php">Trainers</a></li>
+                                    <li class="breadcrumb-item active">Trainer Details</li>
+                                </ol>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
                 <div class="row mt-4">
                     <div class="col-12">
                         <div class="page-title-box d-flex justify-content-between align-items-center">
