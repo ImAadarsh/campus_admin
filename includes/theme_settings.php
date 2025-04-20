@@ -266,7 +266,6 @@
 
         <div class="d-flex align-items-center gap-2 px-3 py-2 offcanvas-header border-top border-dashed">
             <button type="button" class="btn w-50 btn-soft-danger" id="reset-layout">Reset</button>
-            <button type="button" class="btn w-50 btn-soft-info">Buy Now</button>
         </div>
 
     </div>
