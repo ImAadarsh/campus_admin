@@ -108,8 +108,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <input type="checkbox" class="form-check-input" id="checkbox-signin" name="remember">
                                 <label class="form-check-label" for="checkbox-signin">Remember me</label>
                             </div>
-
-                            <a href="auth-recoverpw.php" class="text-muted border-bottom border-dashed">Forget Password</a>
                         </div>
 
                         <div class="d-grid">
