@@ -30,7 +30,7 @@ if ($trainers_result && $trainers_result->num_rows > 0) {
 }
 
 // Get all users
-$users_query = "SELECT id, name FROM users ORDER BY name";
+$users_query = "SELECT id, first_name, last_name FROM users ORDER BY first_name";
 $users_result = $conn->query($users_query);
 $users = [];
 if ($users_result && $users_result->num_rows > 0) {
@@ -365,7 +365,7 @@ include 'includes/head.php';
                                                             <?php foreach ($users as $user): ?>
                                                                 <option value="<?php echo $user['id']; ?>" 
                                                                         <?php echo in_array($user['id'], $assigned_users) ? 'selected' : ''; ?>>
-                                                                    <?php echo htmlspecialchars($user['name']); ?>
+                                                                    <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>
                                                                 </option>
                                                             <?php endforeach; ?>
                                                         </select>

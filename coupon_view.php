@@ -89,7 +89,7 @@ if ($stmt === false) {
 }
 
 // Fetch usage history
-$usage_query = "SELECT cu.*, u.name AS user_name, b.id AS booking_id 
+$usage_query = "SELECT cu.*, CONCAT(u.first_name, ' ', u.last_name) AS user_name, b.id AS booking_id 
                 FROM coupon_usage cu 
                 LEFT JOIN users u ON cu.user_id = u.id 
                 LEFT JOIN bookings b ON cu.booking_id = b.id 
