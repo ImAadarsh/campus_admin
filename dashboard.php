@@ -443,81 +443,87 @@ if ($userType === 'admin') {
 // Get activity timeline
 $timelineQuery = "";
 if ($userType === 'admin') {
-    $timelineQuery = "SELECT * FROM (
+    $timelineQuery = "SELECT type, date, user_name, trainer_name, status FROM (
         SELECT 
-        'booking' as type,
+        CAST('booking' AS CHAR(10)) as type,
         b.created_at as date,
-        CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user_name,
-        CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) as trainer_name,
-        COALESCE(b.status, '') as status
+        CAST(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS CHAR(100)) as user_name,
+        CAST(CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) AS CHAR(100)) as trainer_name,
+        CAST(COALESCE(b.status, '') AS CHAR(20)) as status
         FROM bookings b
         JOIN users u ON b.user_id = u.id
         JOIN time_slots ts ON b.time_slot_id = ts.id
         JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
         JOIN trainers t ON ta.trainer_id = t.id
-        UNION ALL
+    ) AS bookings_data
+    UNION ALL 
+    SELECT type, date, user_name, trainer_name, status FROM (
         SELECT 
-        'review' as type,
+        CAST('review' AS CHAR(10)) as type,
         tr.created_at as date,
-        CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user_name,
-        CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) as trainer_name,
-        CAST(COALESCE(tr.rating, 0) AS CHAR) as status
+        CAST(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS CHAR(100)) as user_name,
+        CAST(CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) AS CHAR(100)) as trainer_name,
+        CAST(COALESCE(tr.rating, 0) AS CHAR(20)) as status
         FROM trainer_reviews tr
         JOIN users u ON tr.user_id = u.id
         JOIN trainers t ON tr.trainer_id = t.id
-    ) as combined
+    ) AS reviews_data
     ORDER BY date DESC
     LIMIT 10";
 } elseif ($userType === 'trainer') {
-    $timelineQuery = "SELECT * FROM (
+    $timelineQuery = "SELECT type, date, user_name, trainer_name, status FROM (
         SELECT 
-        'booking' as type,
+        CAST('booking' AS CHAR(10)) as type,
         b.created_at as date,
-        CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user_name,
-        '' as trainer_name,
-        COALESCE(b.status, '') as status
+        CAST(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS CHAR(100)) as user_name,
+        CAST('' AS CHAR(100)) as trainer_name,
+        CAST(COALESCE(b.status, '') AS CHAR(20)) as status
         FROM bookings b
         JOIN users u ON b.user_id = u.id
         JOIN time_slots ts ON b.time_slot_id = ts.id
         JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
         WHERE ta.trainer_id = ?
-        UNION ALL
+    ) AS bookings_data
+    UNION ALL 
+    SELECT type, date, user_name, trainer_name, status FROM (
         SELECT 
-        'review' as type,
+        CAST('review' AS CHAR(10)) as type,
         tr.created_at as date,
-        CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) as user_name,
-        '' as trainer_name,
-        CAST(COALESCE(tr.rating, 0) AS CHAR) as status
+        CAST(CONCAT(COALESCE(u.first_name, ''), ' ', COALESCE(u.last_name, '')) AS CHAR(100)) as user_name,
+        CAST('' AS CHAR(100)) as trainer_name,
+        CAST(COALESCE(tr.rating, 0) AS CHAR(20)) as status
         FROM trainer_reviews tr
         JOIN users u ON tr.user_id = u.id
         WHERE tr.trainer_id = ?
-    ) as combined
+    ) AS reviews_data
     ORDER BY date DESC
     LIMIT 10";
 } else {
-    $timelineQuery = "SELECT * FROM (
+    $timelineQuery = "SELECT type, date, user_name, trainer_name, status FROM (
         SELECT 
-        'booking' as type,
+        CAST('booking' AS CHAR(10)) as type,
         b.created_at as date,
-        '' as user_name,
-        CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) as trainer_name,
-        COALESCE(b.status, '') as status
+        CAST('' AS CHAR(100)) as user_name,
+        CAST(CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) AS CHAR(100)) as trainer_name,
+        CAST(COALESCE(b.status, '') AS CHAR(20)) as status
         FROM bookings b
         JOIN time_slots ts ON b.time_slot_id = ts.id
         JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
         JOIN trainers t ON ta.trainer_id = t.id
         WHERE b.user_id = ?
-        UNION ALL
+    ) AS bookings_data
+    UNION ALL 
+    SELECT type, date, user_name, trainer_name, status FROM (
         SELECT 
-        'review' as type,
+        CAST('review' AS CHAR(10)) as type,
         tr.created_at as date,
-        '' as user_name,
-        CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) as trainer_name,
-        CAST(COALESCE(tr.rating, 0) AS CHAR) as status
+        CAST('' AS CHAR(100)) as user_name,
+        CAST(CONCAT(COALESCE(t.first_name, ''), ' ', COALESCE(t.last_name, '')) AS CHAR(100)) as trainer_name,
+        CAST(COALESCE(tr.rating, 0) AS CHAR(20)) as status
         FROM trainer_reviews tr
         JOIN trainers t ON tr.trainer_id = t.id
         WHERE tr.user_id = ?
-    ) as combined
+    ) AS reviews_data
     ORDER BY date DESC
     LIMIT 10";
 }
