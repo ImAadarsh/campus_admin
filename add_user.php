@@ -1,6 +1,5 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+include 'config/show_errors.php';
 session_start();
 
 // Check if user is not logged in or not admin
