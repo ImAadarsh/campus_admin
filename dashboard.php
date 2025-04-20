@@ -444,11 +444,11 @@ if ($userType === 'admin') {
 $timelineQuery = "";
 if ($userType === 'admin') {
     $timelineQuery = "SELECT 
-        'booking' as type,
+        'booking' COLLATE utf8mb4_unicode_ci as type,
         b.created_at as date,
-        CONCAT(u.first_name, ' ', u.last_name) as user_name,
-        CONCAT(t.first_name, ' ', t.last_name) as trainer_name,
-        b.status
+        CONCAT(u.first_name COLLATE utf8mb4_unicode_ci, ' ', u.last_name COLLATE utf8mb4_unicode_ci) as user_name,
+        CONCAT(t.first_name COLLATE utf8mb4_unicode_ci, ' ', t.last_name COLLATE utf8mb4_unicode_ci) as trainer_name,
+        b.status COLLATE utf8mb4_unicode_ci
         FROM bookings b
         JOIN users u ON b.user_id = u.id
         JOIN time_slots ts ON b.time_slot_id = ts.id
@@ -456,11 +456,11 @@ if ($userType === 'admin') {
         JOIN trainers t ON ta.trainer_id = t.id
         UNION
         SELECT 
-        'review' as type,
+        'review' COLLATE utf8mb4_unicode_ci as type,
         tr.created_at as date,
-        CONCAT(u.first_name, ' ', u.last_name) as user_name,
-        CONCAT(t.first_name, ' ', t.last_name) as trainer_name,
-        tr.rating as status
+        CONCAT(u.first_name COLLATE utf8mb4_unicode_ci, ' ', u.last_name COLLATE utf8mb4_unicode_ci) as user_name,
+        CONCAT(t.first_name COLLATE utf8mb4_unicode_ci, ' ', t.last_name COLLATE utf8mb4_unicode_ci) as trainer_name,
+        CAST(tr.rating AS CHAR) COLLATE utf8mb4_unicode_ci as status
         FROM trainer_reviews tr
         JOIN users u ON tr.user_id = u.id
         JOIN trainers t ON tr.trainer_id = t.id
@@ -468,11 +468,11 @@ if ($userType === 'admin') {
         LIMIT 10";
 } elseif ($userType === 'trainer') {
     $timelineQuery = "SELECT 
-        'booking' as type,
+        'booking' COLLATE utf8mb4_unicode_ci as type,
         b.created_at as date,
-        CONCAT(u.first_name, ' ', u.last_name) as user_name,
-        '' as trainer_name,
-        b.status
+        CONCAT(u.first_name COLLATE utf8mb4_unicode_ci, ' ', u.last_name COLLATE utf8mb4_unicode_ci) as user_name,
+        '' COLLATE utf8mb4_unicode_ci as trainer_name,
+        b.status COLLATE utf8mb4_unicode_ci
         FROM bookings b
         JOIN users u ON b.user_id = u.id
         JOIN time_slots ts ON b.time_slot_id = ts.id
@@ -480,11 +480,11 @@ if ($userType === 'admin') {
         WHERE ta.trainer_id = ?
         UNION
         SELECT 
-        'review' as type,
+        'review' COLLATE utf8mb4_unicode_ci as type,
         tr.created_at as date,
-        CONCAT(u.first_name, ' ', u.last_name) as user_name,
-        '' as trainer_name,
-        tr.rating as status
+        CONCAT(u.first_name COLLATE utf8mb4_unicode_ci, ' ', u.last_name COLLATE utf8mb4_unicode_ci) as user_name,
+        '' COLLATE utf8mb4_unicode_ci as trainer_name,
+        CAST(tr.rating AS CHAR) COLLATE utf8mb4_unicode_ci as status
         FROM trainer_reviews tr
         JOIN users u ON tr.user_id = u.id
         WHERE tr.trainer_id = ?
@@ -492,11 +492,11 @@ if ($userType === 'admin') {
         LIMIT 10";
 } else {
     $timelineQuery = "SELECT 
-        'booking' as type,
+        'booking' COLLATE utf8mb4_unicode_ci as type,
         b.created_at as date,
-        '' as user_name,
-        CONCAT(t.first_name, ' ', t.last_name) as trainer_name,
-        b.status
+        '' COLLATE utf8mb4_unicode_ci as user_name,
+        CONCAT(t.first_name COLLATE utf8mb4_unicode_ci, ' ', t.last_name COLLATE utf8mb4_unicode_ci) as trainer_name,
+        b.status COLLATE utf8mb4_unicode_ci
         FROM bookings b
         JOIN time_slots ts ON b.time_slot_id = ts.id
         JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
@@ -504,11 +504,11 @@ if ($userType === 'admin') {
         WHERE b.user_id = ?
         UNION
         SELECT 
-        'review' as type,
+        'review' COLLATE utf8mb4_unicode_ci as type,
         tr.created_at as date,
-        '' as user_name,
-        CONCAT(t.first_name, ' ', t.last_name) as trainer_name,
-        tr.rating as status
+        '' COLLATE utf8mb4_unicode_ci as user_name,
+        CONCAT(t.first_name COLLATE utf8mb4_unicode_ci, ' ', t.last_name COLLATE utf8mb4_unicode_ci) as trainer_name,
+        CAST(tr.rating AS CHAR) COLLATE utf8mb4_unicode_ci as status
         FROM trainer_reviews tr
         JOIN trainers t ON tr.trainer_id = t.id
         WHERE tr.user_id = ?

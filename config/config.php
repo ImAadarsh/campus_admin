@@ -1,6 +1,6 @@
 <?php
 // Database configuration
-$host = "82.180.142.204";
+$host = "localhost";
 $user = "u954141192_campus_coach";
 $password = "1@CampusCoach";
 $dbname = "u954141192_campus_coach";
@@ -13,8 +13,10 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Set charset to utf8mb4
+// Set charset and collation
 mysqli_set_charset($conn, "utf8mb4");
+mysqli_query($conn, "SET collation_connection = utf8mb4_unicode_ci");
+mysqli_query($conn, "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 
 $uri = 'https://backend.campuscoach.in/storage/app/';
 date_default_timezone_set('Asia/Kolkata');
