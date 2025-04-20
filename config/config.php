@@ -13,10 +13,6 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 
-// Set charset and collation
-mysqli_set_charset($conn, "utf8mb4");
-mysqli_query($conn, "SET collation_connection = utf8mb4_unicode_ci");
-mysqli_query($conn, "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
 
 $uri = 'https://backend.campuscoach.in/storage/app/';
 date_default_timezone_set('Asia/Kolkata');
