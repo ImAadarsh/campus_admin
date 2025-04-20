@@ -76,8 +76,28 @@ LEFT JOIN time_slots ts ON b.time_slot_id = ts.id
 LEFT JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
 LEFT JOIN payments p ON b.id = p.booking_id
 LEFT JOIN trainer_reviews tr ON b.id = tr.booking_id
-WHERE ta.date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
-GROUP BY DATE_FORMAT(ta.date, '%Y-%m')
+LEFT JOIN trainers t ON ta.trainer_id = t.id
+LEFT JOIN users u ON b.user_id = u.id
+WHERE ta.date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)";
+
+// Apply the same filters to trends query
+if ($filters['trainer_id']) {
+    $trends_query .= " AND ta.trainer_id = " . mysqli_real_escape_string($conn, $filters['trainer_id']);
+}
+if ($filters['user_id']) {
+    $trends_query .= " AND b.user_id = " . mysqli_real_escape_string($conn, $filters['user_id']);
+}
+if ($filters['date_from']) {
+    $trends_query .= " AND ta.date >= '" . mysqli_real_escape_string($conn, $filters['date_from']) . "'";
+}
+if ($filters['date_to']) {
+    $trends_query .= " AND ta.date <= '" . mysqli_real_escape_string($conn, $filters['date_to']) . "'";
+}
+if ($filters['status']) {
+    $trends_query .= " AND b.status = '" . mysqli_real_escape_string($conn, $filters['status']) . "'";
+}
+
+$trends_query .= " GROUP BY DATE_FORMAT(ta.date, '%Y-%m')
 ORDER BY month ASC";
 
 $trends_result = mysqli_query($conn, $trends_query);
@@ -96,7 +116,27 @@ LEFT JOIN time_slots ts ON ta.id = ts.trainer_availability_id
 LEFT JOIN bookings b ON ts.id = b.time_slot_id
 LEFT JOIN trainer_reviews tr ON b.id = tr.booking_id
 LEFT JOIN payments p ON b.id = p.booking_id
-GROUP BY t.id
+LEFT JOIN users u ON b.user_id = u.id
+WHERE 1=1";
+
+// Apply the same filters to top trainers query
+if ($filters['trainer_id']) {
+    $top_trainers_query .= " AND ta.trainer_id = " . mysqli_real_escape_string($conn, $filters['trainer_id']);
+}
+if ($filters['user_id']) {
+    $top_trainers_query .= " AND b.user_id = " . mysqli_real_escape_string($conn, $filters['user_id']);
+}
+if ($filters['date_from']) {
+    $top_trainers_query .= " AND ta.date >= '" . mysqli_real_escape_string($conn, $filters['date_from']) . "'";
+}
+if ($filters['date_to']) {
+    $top_trainers_query .= " AND ta.date <= '" . mysqli_real_escape_string($conn, $filters['date_to']) . "'";
+}
+if ($filters['status']) {
+    $top_trainers_query .= " AND b.status = '" . mysqli_real_escape_string($conn, $filters['status']) . "'";
+}
+
+$top_trainers_query .= " GROUP BY t.id
 ORDER BY total_sessions DESC
 LIMIT 5";
 
@@ -480,10 +520,12 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
     <script>
         // Prepare data for charts
         const trendsData = <?php echo json_encode($trends); ?>;
+        console.log('Trends data:', trendsData); // Debug log to see the data
+        
         const statusData = {
-            completed: <?php echo $stats['completed_sessions']; ?>,
-            pending: <?php echo $stats['pending_sessions']; ?>,
-            cancelled: <?php echo $stats['cancelled_sessions']; ?>
+            completed: <?php echo (int)$stats['completed_sessions']; ?>,
+            pending: <?php echo (int)$stats['pending_sessions']; ?>,
+            cancelled: <?php echo (int)$stats['cancelled_sessions']; ?>
         };
 
         // Trends Chart
@@ -491,48 +533,87 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
             series: [{
                 name: 'Bookings',
                 type: 'column',
-                data: trendsData.map(item => parseInt(item.total_bookings))
+                data: trendsData.length > 0 ? trendsData.map(item => parseInt(item.total_bookings || 0)) : [0]
             }, {
                 name: 'Revenue',
                 type: 'line',
-                data: trendsData.map(item => parseInt(item.revenue))
+                data: trendsData.length > 0 ? trendsData.map(item => parseInt(item.revenue || 0)) : [0]
             }],
             chart: {
                 height: 350,
                 type: 'line',
                 toolbar: {
-                    show: false
+                    show: true, // Enable toolbar for debugging
+                    tools: {
+                        download: true,
+                        selection: true,
+                        zoom: true,
+                        zoomin: true,
+                        zoomout: true,
+                        pan: true,
+                        reset: true
+                    }
                 }
             },
             stroke: {
                 width: [0, 4]
             },
             title: {
-                text: 'Monthly Trends'
+                text: 'Monthly Trends' + (trendsData.length === 0 ? ' (No Data)' : '')
             },
             dataLabels: {
                 enabled: true,
                 enabledOnSeries: [1]
             },
-            labels: trendsData.map(item => moment(item.month + '-01').format('MMM YYYY')),
+            labels: trendsData.length > 0 ? trendsData.map(item => {
+                // Ensure proper date formatting by checking if month format is valid
+                if (item.month && item.month.match(/^\d{4}-\d{2}$/)) {
+                    return moment(item.month + '-01').format('MMM YYYY');
+                } else {
+                    return item.month || 'Unknown Date';
+                }
+            }) : ['No Data'],
             xaxis: {
-                type: 'datetime'
+                type: trendsData.length > 0 ? 'category' : 'category',
+                labels: {
+                    formatter: function(value) {
+                        return value;
+                    }
+                }
             },
             yaxis: [{
                 title: {
                     text: 'Bookings',
                 },
+                min: 0
             }, {
                 opposite: true,
                 title: {
                     text: 'Revenue'
+                },
+                min: 0
+            }],
+            noData: {
+                text: 'No data available for the selected filters',
+                align: 'center',
+                verticalAlign: 'middle',
+                offsetX: 0,
+                offsetY: 0,
+                style: {
+                    color: '#6c757d',
+                    fontSize: '16px',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
                 }
-            }]
+            }
         };
 
         // Status Distribution Chart
         const statusOptions = {
-            series: [statusData.completed, statusData.pending, statusData.cancelled],
+            series: [
+                parseInt(statusData.completed || 0), 
+                parseInt(statusData.pending || 0), 
+                parseInt(statusData.cancelled || 0)
+            ],
             chart: {
                 type: 'donut',
                 height: 350
@@ -541,6 +622,18 @@ if (isset($_GET['export']) && $_GET['export'] == 'csv') {
             colors: ['#0acf97', '#ffc107', '#fa5c7c'],
             legend: {
                 position: 'bottom'
+            },
+            noData: {
+                text: 'No data available',
+                align: 'center',
+                verticalAlign: 'middle',
+                offsetX: 0,
+                offsetY: 0,
+                style: {
+                    color: '#6c757d',
+                    fontSize: '16px',
+                    fontFamily: 'Helvetica, Arial, sans-serif'
+                }
             }
         };
 
