@@ -146,10 +146,10 @@ $payment_statuses = ['pending', 'completed', 'failed', 'refunded'];
 // Calculate summary statistics
 $stats_sql = "SELECT 
     COUNT(*) as total_transactions,
-    COALESCE(SUM(CASE WHEN status = 'completed' THEN amount ELSE 0 END), 0) as total_revenue,
-    COALESCE(SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END), 0) as pending_amount,
-    COALESCE(SUM(CASE WHEN status = 'refunded' THEN amount ELSE 0 END), 0) as refunded_amount,
-    COALESCE(AVG(CASE WHEN status = 'completed' THEN amount ELSE NULL END), 0) as avg_transaction
+    COALESCE(SUM(CASE WHEN p.status = 'completed' THEN p.amount ELSE 0 END), 0) as total_revenue,
+    COALESCE(SUM(CASE WHEN p.status = 'pending' THEN p.amount ELSE 0 END), 0) as pending_amount,
+    COALESCE(SUM(CASE WHEN p.status = 'refunded' THEN p.amount ELSE 0 END), 0) as refunded_amount,
+    COALESCE(AVG(CASE WHEN p.status = 'completed' THEN p.amount ELSE NULL END), 0) as avg_transaction
     FROM payments p 
     LEFT JOIN bookings b ON p.booking_id = b.id 
     LEFT JOIN users u ON b.user_id = u.id 
