@@ -78,8 +78,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="col-xl-4 col-lg-5 col-md-6">
                 <div class="card overflow-hidden text-center h-100 p-xxl-4 p-3 mb-0">
                     <a href="index.php" class="auth-brand mb-3">
-                        <img src="assets/images/logo-dark.png" alt="dark logo" height="30" class="logo-dark">
-                        <img src="assets/images/logo.png" alt="logo light" height="30" class="logo-light">
+                   
+                            <span class="logo-lg"><span class="logo-text">Campus Coach</span></span>
+                            <span class="logo-sm"><span class="logo-text-sm">CC</span></span>
+                   
                     </a>
 
                     <h4 class="fw-semibold mb-2">Login your account</h4>
@@ -115,16 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </div>
                     </form>
 
-                    <p class="text-danger fs-14 mb-4">Don't have an account? <a href="auth-register.php" class="fw-semibold text-dark ms-1">Sign Up !</a></p>
 
-                    <p class="fs-13 fw-semibold">Or Login with Social</p>
-
-                    <div class="d-flex justify-content-center gap-2 mb-3">
-                        <a href="#!" class="btn btn-soft-danger avatar-lg"><i class="ti ti-brand-google-filled fs-24"></i></a>
-                        <a href="#!" class="btn btn-soft-success avatar-lg"><i class="ti ti-brand-apple fs-24"></i></a>
-                        <a href="#!" class="btn btn-soft-primary avatar-lg"><i class="ti ti-brand-facebook fs-24"></i></a>
-                        <a href="#!" class="btn btn-soft-info avatar-lg"><i class="ti ti-brand-linkedin fs-24"></i></a>
-                    </div>
 
                     <p class="mt-auto mb-0">
                         <script>document.write(new Date().getFullYear())</script> © Campus Coach - By <span class="fw-bold text-decoration-underline text-uppercase text-reset fs-12">Endeavour Digital</span>
