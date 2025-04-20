@@ -76,7 +76,7 @@ if ($filters['user']) {
 
 if ($filters['trainer']) {
     $trainer = mysqli_real_escape_string($conn, $filters['trainer']);
-    $where_conditions[] = "ta.trainer_id = '$trainer'";
+    $where_conditions[] = "t.id = '$trainer'";
 }
 
 $where_clause = !empty($where_conditions) ? 'WHERE ' . implode(' AND ', $where_conditions) : '';
