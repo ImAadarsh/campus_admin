@@ -362,39 +362,38 @@ $recentReviews = mysqli_fetch_all($result, MYSQLI_ASSOC);
 // Get revenue overview for admin
 if ($userType === 'admin') {
     $currentMonth = date('Y-m');
+    $previousMonth = date('Y-m', strtotime('-1 month'));
     
-    // Get current month revenue
-    $sql = "SELECT SUM(amount) as revenue FROM payments 
+    // Get current month revenue - using direct query instead of prepared statement
+    $currentMonthStart = date('Y-m-01 00:00:00');
+    $currentMonthEnd = date('Y-m-t 23:59:59');
+    
+    $sql = "SELECT COALESCE(SUM(amount), 0) as revenue FROM payments 
             WHERE status = 'completed' 
-            AND DATE_FORMAT(created_at, '%Y-%m') = ?";
-    $stmt = mysqli_prepare($conn, $sql);
-    if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "s", $currentMonth);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        if ($result !== false) {
-            $currentMonthRevenue = mysqli_fetch_assoc($result)['revenue'] ?? 0;
-        } else {
-            $currentMonthRevenue = 0;
-        }
-        mysqli_stmt_close($stmt);
+            AND created_at >= '$currentMonthStart' 
+            AND created_at <= '$currentMonthEnd'";
+    
+    $result = mysqli_query($conn, $sql);
+    if ($result !== false) {
+        $row = mysqli_fetch_assoc($result);
+        $currentMonthRevenue = $row['revenue'] ?? 0;
     } else {
         $currentMonthRevenue = 0;
     }
-
+    
     // Get previous month revenue
-    $previousMonth = date('Y-m', strtotime('-1 month'));
-    $stmt = mysqli_prepare($conn, $sql);
-    if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "s", $previousMonth);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        if ($result !== false) {
-            $previousMonthRevenue = mysqli_fetch_assoc($result)['revenue'] ?? 0;
-        } else {
-            $previousMonthRevenue = 0;
-        }
-        mysqli_stmt_close($stmt);
+    $previousMonthStart = date('Y-m-01 00:00:00', strtotime('-1 month'));
+    $previousMonthEnd = date('Y-m-t 23:59:59', strtotime('-1 month'));
+    
+    $sql = "SELECT COALESCE(SUM(amount), 0) as revenue FROM payments 
+            WHERE status = 'completed' 
+            AND created_at >= '$previousMonthStart' 
+            AND created_at <= '$previousMonthEnd'";
+    
+    $result = mysqli_query($conn, $sql);
+    if ($result !== false) {
+        $row = mysqli_fetch_assoc($result);
+        $previousMonthRevenue = $row['revenue'] ?? 0;
     } else {
         $previousMonthRevenue = 0;
     }
@@ -440,221 +439,156 @@ if ($userType === 'admin') {
     }
 }
 
-// Debug function
-function debug_print($message, $data = null) {
-    echo "<pre style='background: #f5f5f5; padding: 10px; margin: 5px; border: 1px solid #ddd;'>";
-    echo "DEBUG: " . $message . "\n";
-    if ($data !== null) {
-        echo "Data: ";
-        print_r($data);
-    }
-    echo "</pre>";
-}
-
 // Get activity timeline
-debug_print("User Type", $userType);
-debug_print("User ID", $userId);
-
 $timeline = [];
 
-try {
-    if ($userType === 'admin') {
-        // Get bookings for admin
-        $query = "SELECT 
-            'booking' as type,
-            b.created_at as date,
-            u.first_name as user_fname,
-            u.last_name as user_lname,
-            t.first_name as trainer_fname,
-            t.last_name as trainer_lname,
-            b.status
-            FROM bookings b
-            INNER JOIN users u ON b.user_id = u.id
-            INNER JOIN time_slots ts ON b.time_slot_id = ts.id
-            INNER JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
-            INNER JOIN trainers t ON ta.trainer_id = t.id
-            ORDER BY b.created_at DESC
-            LIMIT 5";
-
-        debug_print("Admin Bookings Query", $query);
-        $result = mysqli_query($conn, $query);
-        
-        if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $timeline[] = [
-                    'type' => 'booking',
-                    'date' => $row['date'],
-                    'user_name' => $row['user_fname'] . ' ' . $row['user_lname'],
-                    'trainer_name' => $row['trainer_fname'] . ' ' . $row['trainer_lname'],
-                    'status' => $row['status']
-                ];
-            }
-        }
-
-        // Get reviews for admin
-        $query = "SELECT 
-            'review' as type,
-            tr.created_at as date,
-            u.first_name as user_fname,
-            u.last_name as user_lname,
-            t.first_name as trainer_fname,
-            t.last_name as trainer_lname,
-            tr.rating as status
-            FROM trainer_reviews tr
-            INNER JOIN users u ON tr.user_id = u.id
-            INNER JOIN trainers t ON tr.trainer_id = t.id
-            ORDER BY tr.created_at DESC
-            LIMIT 5";
-
-        debug_print("Admin Reviews Query", $query);
-        $result = mysqli_query($conn, $query);
-        
-        if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $timeline[] = [
-                    'type' => 'review',
-                    'date' => $row['date'],
-                    'user_name' => $row['user_fname'] . ' ' . $row['user_lname'],
-                    'trainer_name' => $row['trainer_fname'] . ' ' . $row['trainer_lname'],
-                    'status' => $row['status']
-                ];
-            }
-        }
-
-    } elseif ($userType === 'trainer') {
-        // Get bookings for trainer
-        $escaped_user_id = mysqli_real_escape_string($conn, $userId);
-        $query = "SELECT 
-            'booking' as type,
-            b.created_at as date,
-            u.first_name as user_fname,
-            u.last_name as user_lname,
-            b.status
-            FROM bookings b
-            INNER JOIN users u ON b.user_id = u.id
-            INNER JOIN time_slots ts ON b.time_slot_id = ts.id
-            INNER JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
-            WHERE ta.trainer_id = {$escaped_user_id}
-            ORDER BY b.created_at DESC
-            LIMIT 5";
-
-        debug_print("Trainer Bookings Query", $query);
-        $result = mysqli_query($conn, $query);
-        
-        if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $timeline[] = [
-                    'type' => 'booking',
-                    'date' => $row['date'],
-                    'user_name' => $row['user_fname'] . ' ' . $row['user_lname'],
-                    'trainer_name' => '',
-                    'status' => $row['status']
-                ];
-            }
-        }
-
-        // Get reviews for trainer
-        $query = "SELECT 
-            'review' as type,
-            tr.created_at as date,
-            u.first_name as user_fname,
-            u.last_name as user_lname,
-            tr.rating as status
-            FROM trainer_reviews tr
-            INNER JOIN users u ON tr.user_id = u.id
-            WHERE tr.trainer_id = {$escaped_user_id}
-            ORDER BY tr.created_at DESC
-            LIMIT 5";
-
-        debug_print("Trainer Reviews Query", $query);
-        $result = mysqli_query($conn, $query);
-        
-        if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $timeline[] = [
-                    'type' => 'review',
-                    'date' => $row['date'],
-                    'user_name' => $row['user_fname'] . ' ' . $row['user_lname'],
-                    'trainer_name' => '',
-                    'status' => $row['status']
-                ];
-            }
-        }
-
-    } else {
-        // Get bookings for user
-        $escaped_user_id = mysqli_real_escape_string($conn, $userId);
-        $query = "SELECT 
-            'booking' as type,
-            b.created_at as date,
-            t.first_name as trainer_fname,
-            t.last_name as trainer_lname,
-            b.status
-            FROM bookings b
-            INNER JOIN time_slots ts ON b.time_slot_id = ts.id
-            INNER JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
-            INNER JOIN trainers t ON ta.trainer_id = t.id
-            WHERE b.user_id = {$escaped_user_id}
-            ORDER BY b.created_at DESC
-            LIMIT 5";
-
-        debug_print("User Bookings Query", $query);
-        $result = mysqli_query($conn, $query);
-        
-        if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $timeline[] = [
-                    'type' => 'booking',
-                    'date' => $row['date'],
-                    'user_name' => '',
-                    'trainer_name' => $row['trainer_fname'] . ' ' . $row['trainer_lname'],
-                    'status' => $row['status']
-                ];
-            }
-        }
-
-        // Get reviews for user
-        $query = "SELECT 
-            'review' as type,
-            tr.created_at as date,
-            t.first_name as trainer_fname,
-            t.last_name as trainer_lname,
-            tr.rating as status
-            FROM trainer_reviews tr
-            INNER JOIN trainers t ON tr.trainer_id = t.id
-            WHERE tr.user_id = {$escaped_user_id}
-            ORDER BY tr.created_at DESC
-            LIMIT 5";
-
-        debug_print("User Reviews Query", $query);
-        $result = mysqli_query($conn, $query);
-        
-        if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $timeline[] = [
-                    'type' => 'review',
-                    'date' => $row['date'],
-                    'user_name' => '',
-                    'trainer_name' => $row['trainer_fname'] . ' ' . $row['trainer_lname'],
-                    'status' => $row['status']
-                ];
-            }
-        }
+if ($userType === 'admin') {
+    // Get bookings for timeline
+    $sql = "SELECT 
+        'booking' as type,
+        b.created_at as date,
+        CONCAT(u.first_name, ' ', u.last_name) as user_name,
+        CONCAT(t.first_name, ' ', t.last_name) as trainer_name,
+        b.status
+        FROM bookings b
+        JOIN users u ON b.user_id = u.id
+        JOIN time_slots ts ON b.time_slot_id = ts.id
+        JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
+        JOIN trainers t ON ta.trainer_id = t.id
+        ORDER BY b.created_at DESC
+        LIMIT 5";
+    
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $bookingTimeline = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $timeline = array_merge($timeline, $bookingTimeline);
     }
-
-    // Sort combined timeline by date
+    
+    // Get reviews for timeline 
+    $sql = "SELECT 
+        'review' as type,
+        tr.created_at as date,
+        CONCAT(u.first_name, ' ', u.last_name) as user_name,
+        CONCAT(t.first_name, ' ', t.last_name) as trainer_name,
+        tr.rating as status
+        FROM trainer_reviews tr
+        JOIN users u ON tr.user_id = u.id
+        JOIN trainers t ON tr.trainer_id = t.id
+        ORDER BY tr.created_at DESC
+        LIMIT 5";
+    
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $reviewTimeline = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $timeline = array_merge($timeline, $reviewTimeline);
+    }
+    
+    // Sort the combined results by date
     usort($timeline, function($a, $b) {
         return strtotime($b['date']) - strtotime($a['date']);
     });
-
-    // Keep only the first 10 items
+    
+    // Limit to 10 items
     $timeline = array_slice($timeline, 0, 10);
-
-} catch (Exception $e) {
-    debug_print("Exception caught", $e->getMessage());
+    
+} elseif ($userType === 'trainer') {
+    // Get bookings for trainer timeline
+    $sql = "SELECT 
+        'booking' as type,
+        b.created_at as date,
+        CONCAT(u.first_name, ' ', u.last_name) as user_name,
+        '' as trainer_name,
+        b.status
+        FROM bookings b
+        JOIN users u ON b.user_id = u.id
+        JOIN time_slots ts ON b.time_slot_id = ts.id
+        JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
+        WHERE ta.trainer_id = $userId
+        ORDER BY b.created_at DESC
+        LIMIT 5";
+    
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $bookingTimeline = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $timeline = array_merge($timeline, $bookingTimeline);
+    }
+    
+    // Get reviews for trainer timeline
+    $sql = "SELECT 
+        'review' as type,
+        tr.created_at as date,
+        CONCAT(u.first_name, ' ', u.last_name) as user_name,
+        '' as trainer_name,
+        tr.rating as status
+        FROM trainer_reviews tr
+        JOIN users u ON tr.user_id = u.id
+        WHERE tr.trainer_id = $userId
+        ORDER BY tr.created_at DESC
+        LIMIT 5";
+    
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $reviewTimeline = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $timeline = array_merge($timeline, $reviewTimeline);
+    }
+    
+    // Sort the combined results by date
+    usort($timeline, function($a, $b) {
+        return strtotime($b['date']) - strtotime($a['date']);
+    });
+    
+    // Limit to 10 items
+    $timeline = array_slice($timeline, 0, 10);
+    
+} else {
+    // Get bookings for user timeline
+    $sql = "SELECT 
+        'booking' as type,
+        b.created_at as date,
+        '' as user_name,
+        CONCAT(t.first_name, ' ', t.last_name) as trainer_name,
+        b.status
+        FROM bookings b
+        JOIN time_slots ts ON b.time_slot_id = ts.id
+        JOIN trainer_availabilities ta ON ts.trainer_availability_id = ta.id
+        JOIN trainers t ON ta.trainer_id = t.id
+        WHERE b.user_id = $userId
+        ORDER BY b.created_at DESC
+        LIMIT 5";
+    
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $bookingTimeline = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $timeline = array_merge($timeline, $bookingTimeline);
+    }
+    
+    // Get reviews for user timeline
+    $sql = "SELECT 
+        'review' as type,
+        tr.created_at as date,
+        '' as user_name,
+        CONCAT(t.first_name, ' ', t.last_name) as trainer_name,
+        tr.rating as status
+        FROM trainer_reviews tr
+        JOIN trainers t ON tr.trainer_id = t.id
+        WHERE tr.user_id = $userId
+        ORDER BY tr.created_at DESC
+        LIMIT 5";
+    
+    $result = mysqli_query($conn, $sql);
+    if ($result) {
+        $reviewTimeline = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $timeline = array_merge($timeline, $reviewTimeline);
+    }
+    
+    // Sort the combined results by date
+    usort($timeline, function($a, $b) {
+        return strtotime($b['date']) - strtotime($a['date']);
+    });
+    
+    // Limit to 10 items
+    $timeline = array_slice($timeline, 0, 10);
 }
-
-debug_print("Final Timeline Data", $timeline);
 ?>
 
 <!DOCTYPE html>
