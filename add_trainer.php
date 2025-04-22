@@ -56,31 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($apiResponse['success']) {
         // Insert into local database
-        $sql = "INSERT INTO trainers (
-            first_name, last_name, designation, short_about, about,
-            email, mobile, profile_img, hero_img, token
-        ) VALUES (
-            '" . mysqli_real_escape_string($conn, $_POST['first_name']) . "',
-            '" . mysqli_real_escape_string($conn, $_POST['last_name']) . "',
-            '" . mysqli_real_escape_string($conn, $_POST['designation']) . "',
-            '" . mysqli_real_escape_string($conn, $_POST['short_about']) . "',
-            '" . mysqli_real_escape_string($conn, $_POST['about']) . "',
-            '" . mysqli_real_escape_string($conn, $_POST['email']) . "',
-            '" . mysqli_real_escape_string($conn, $_POST['mobile']) . "',
-            '" . mysqli_real_escape_string($conn, $apiResponse['data']['profile_img'] ?? '') . "',
-            '" . mysqli_real_escape_string($conn, $apiResponse['data']['hero_img'] ?? '') . "',
-            '" . mysqli_real_escape_string($conn, $apiResponse['data']['token'] ?? '') . "'
-        )";
-        
-        if (mysqli_query($conn, $sql)) {
             $response['success'] = true;
             $response['message'] = 'Trainer added successfully';
             header("Location: trainers.php");
             exit();
-        } else {
-            $response['success'] = false;
-            $response['message'] = 'Failed to add trainer to local database';
-        }
+       
     } else {
         $response['success'] = false;
         $response['message'] = $apiResponse['message'] ?? 'Failed to add trainer';
