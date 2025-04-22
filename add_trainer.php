@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Prepare the data for API
     $postData = [
-        'token' => 'xTtqv6cI8ot8G04WWvJr229a5YxroHBZYiaJsWO63gpTT2B8wZD32D57Lb6P',
+        'token' => $_SESSION['token'],
         'first_name' => $_POST['first_name'],
         'last_name' => $_POST['last_name'],
         'short_about' => $_POST['short_about'],
