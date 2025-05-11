@@ -277,7 +277,7 @@ if ($user_type !== 'admin' && $booking['user_id'] !== $user_id && $booking['trai
                                     <?php if ($user_type === 'admin' || $user_id === $booking['trainer_id']): ?>
                                         <?php if ($booking['status'] === 'pending'): ?>
                                             <button class="btn btn-success w-100 mb-2" onclick="updateBookingStatus(<?php echo $booking['id']; ?>, 'confirmed')">
-                                                <i class="ti ti-check me-1"></i> Confirm Booking
+                                                <i class="ti ti-check me-1"></i> Confirm Booking Payment
                                             </button>
                                         <?php endif; ?>
                                         
@@ -320,9 +320,8 @@ if ($user_type !== 'admin' && $booking['user_id'] !== $user_id && $booking['trai
                                             <p class="mb-1">Requested Date: <?php echo date('d M Y', strtotime($reschedule_request['requested_date'])); ?></p>
                                             <p class="mb-1">Requested Time: <?php echo date('h:i A', strtotime($reschedule_request['requested_start_time'])) . ' - ' . date('h:i A', strtotime($reschedule_request['requested_end_time'])); ?></p>
                                             <p class="mb-0">Reason: <?php echo $reschedule_request['reason']; ?></p>
-                                            
                                             <?php if ($reschedule_request['status'] === 'pending'): ?>
-                                                <?php if (($user_type === 'admin' || $user_id === $booking['trainer_id']) && $reschedule_request['requested_by'] === 'user'): ?>
+                                                <?php if (($user_type === 'admin' || $user_id === $booking['trainer_id']) || $reschedule_request['requested_by'] === 'user'): ?>
                                                     <div class="mt-2">
                                                         <button class="btn btn-sm btn-success" onclick="approveReschedule(<?php echo $reschedule_request['id']; ?>)">
                                                             <i class="ti ti-check me-1"></i> Approve
