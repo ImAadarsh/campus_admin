@@ -100,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                      last_name = '" . mysqli_real_escape_string($conn, $_POST['last_name']) . "',
                      designation = '" . mysqli_real_escape_string($conn, $_POST['designation']) . "',
                      short_about = '" . mysqli_real_escape_string($conn, $_POST['short_about']) . "',
+                     about = '" . mysqli_real_escape_string($conn, $_POST['full_about']) . "',
                      mobile = '" . mysqli_real_escape_string($conn, $_POST['mobile']) . "'
                      WHERE id = $trainerId";
         
@@ -206,6 +207,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="mb-3">
                                         <label for="short_about" class="form-label">Short About</label>
                                         <textarea class="form-control" id="short_about" name="short_about" rows="3"><?php echo $trainer['short_about'] ?? ''; ?></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="full_about" class="form-label">Full About</label>
+                                        <textarea class="form-control" id="full_about" name="full_about" rows="3"><?php echo $trainer['about'] ?? ''; ?></textarea>
                                     </div>
 
                                     <div class="mb-3">
